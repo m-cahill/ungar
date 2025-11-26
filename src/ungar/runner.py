@@ -27,7 +27,7 @@ def play_random_episode(spec: GameSpec, seed: int | None = None) -> Episode:
     states: List[object] = [state]
     moves: List[Move] = []
 
-    # Just in case of infinite loops in broken games, we might want a limit, 
+    # Just in case of infinite loops in broken games, we might want a limit,
     # but for M02 the loop condition is strict.
     while not state.is_terminal():
         legal = state.legal_moves()
@@ -42,4 +42,3 @@ def play_random_episode(spec: GameSpec, seed: int | None = None) -> Episode:
 
     # If we somehow started in terminal (should not happen usually but valid)
     return Episode(states=states, moves=moves, rewards=state.returns())
-

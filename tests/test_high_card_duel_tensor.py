@@ -3,7 +3,6 @@
 from ungar.cards import Card
 from ungar.enums import Rank, Suit
 from ungar.games.high_card_duel import HighCardDuelState
-from ungar.tensor import CardTensor
 
 
 def test_tensor_invariants() -> None:
@@ -12,7 +11,7 @@ def test_tensor_invariants() -> None:
     # P0 revealed, P1 not.
     p0_card = Card(Suit.SPADES, Rank.ACE)
     p1_card = Card(Suit.SPADES, Rank.KING)
-    
+
     state = HighCardDuelState(
         hands=(p0_card, p1_card),
         revealed=(True, False),
@@ -24,7 +23,7 @@ def test_tensor_invariants() -> None:
     # So Ace in my_hand. King in unseen.
     t0 = state.to_tensor(player=0)
     t0.validate_partition(["my_hand", "opponent_hand", "unseen"])
-    
+
     # Check Ace is in my_hand
     assert p0_card in t0.cards_in_plane("my_hand")
     # Check King is in unseen
@@ -60,8 +59,7 @@ def test_tensor_fully_revealed() -> None:
 
     t0 = state.to_tensor(player=0)
     t0.validate_partition(["my_hand", "opponent_hand", "unseen"])
-    
+
     assert p0_card in t0.cards_in_plane("my_hand")
     assert p1_card in t0.cards_in_plane("opponent_hand")
     assert len(t0.cards_in_plane("unseen")) == 54
-

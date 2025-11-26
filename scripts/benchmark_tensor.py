@@ -26,4 +26,3 @@ def main(iterations: int = 10_000, seed: int | None = 123) -> None:
 
 if __name__ == "__main__":
     main()
-

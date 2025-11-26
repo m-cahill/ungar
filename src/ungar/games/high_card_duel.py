@@ -126,4 +126,3 @@ class HighCardDuelSpec(GameSpec):
 def make_high_card_duel_spec() -> HighCardDuelSpec:
     """Create a spec for High Card Duel."""
     return HighCardDuelSpec(name=HIGH_CARD_DUEL_NAME, num_players=NUM_PLAYERS)
-

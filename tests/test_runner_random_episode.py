@@ -12,7 +12,7 @@ def test_high_card_duel_random_episode() -> None:
     # HighCardDuel always has exactly 2 moves (reveal, reveal)
     assert len(episode.moves) == 2
     assert len(episode.states) == 3  # Start, after P0, after P1
-    
+
     # Check rewards shape
     assert len(episode.rewards) == 2
     # Sum should be 0.0 (zero sum game)
@@ -28,9 +28,8 @@ def test_runner_determinism() -> None:
 
     assert ep1.moves == ep2.moves
     assert ep1.rewards == ep2.rewards
-    
-    # With high probability, different seeds might yield different outcomes 
+
+    # With high probability, different seeds might yield different outcomes
     # (though with 2 players and 1 card each, collision is possible, but full state sequence likely differs)
     # Actually, hands will likely differ.
     assert ep1.states[0] != ep3.states[0]
-

@@ -1,7 +1,6 @@
 """Unit tests for High Card Duel logic."""
 
 import pytest
-
 from ungar.cards import Card
 from ungar.enums import Rank, Suit
 from ungar.game import GameEnv, IllegalMoveError, Move
@@ -34,30 +33,30 @@ def test_game_flow() -> None:
         revealed=(False, False),
         _current_player=0,
     )
-    
+
     # Check initial
     assert state.current_player() == 0
     assert not state.is_terminal()
     assert state.legal_moves() == (Move(id=0, name="reveal"),)
-    
+
     # P0 reveals
     state = state.apply_move(Move(id=0, name="reveal"))
     assert state.current_player() == 1
     assert not state.is_terminal()
     assert state.revealed == (True, False)
-    
+
     # P1 reveals
     state = state.apply_move(Move(id=0, name="reveal"))
     assert state.is_terminal()
     assert state.revealed == (True, True)
-    
+
     # Rewards
     rewards = state.returns()
     assert rewards == (1.0, -1.0)
 
 
 def test_tie() -> None:
-    """Test tie scenario (same rank, different suits not possible in 1 deck without reuse, 
+    """Test tie scenario (same rank, different suits not possible in 1 deck without reuse,
     but strictly speaking logic should handle equality)."""
     # Force equality by reusing card object or same rank different suit
     c1 = Card(Suit.SPADES, Rank.ACE)
@@ -87,7 +86,7 @@ def test_illegal_moves() -> None:
     spec = make_high_card_duel_spec()
     env = GameEnv(spec)
     env.reset()
-    
+
     # Wrong move name/id
     with pytest.raises(IllegalMoveError):
         env.step(Move(id=1, name="fold"))  # id 1 is irrelevant, name is key, or logic
@@ -98,4 +97,3 @@ def test_illegal_moves() -> None:
     # Now terminal
     with pytest.raises(IllegalMoveError):
         env.step(Move(id=0, name="reveal"))
-

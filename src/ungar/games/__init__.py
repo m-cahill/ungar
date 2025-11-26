@@ -1,2 +1,1 @@
 """Game implementations for UNGAR."""
-

@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import Sequence, Tuple
 
 import pytest
-
 from ungar.game import (
     GameEnv,
     GameSpec,
@@ -136,4 +135,3 @@ def test_no_magic_numbers() -> None:
                             "Use constants from ungar.enums (RANK_COUNT, SUIT_COUNT, etc.)."
                         )
                         pytest.fail(msg)
-
