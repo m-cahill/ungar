@@ -80,7 +80,7 @@ def test_spec_determinism() -> None:
     assert isinstance(state1, HighCardDuelState)
     assert isinstance(state2, HighCardDuelState)
     assert isinstance(state3, HighCardDuelState)
-    
+
     # Check attributes exist and match
     assert state1.hands == state2.hands
     assert state1.hands != state3.hands  # High probability
