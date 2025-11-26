@@ -41,3 +41,4 @@ src/ungar/
 *   **M00:** Foundation (Repo, CI).
 *   **M01:** Core Tensor (4x14 grid, partitioning).
 *   **M02:** Game Interfaces & High Card Duel.
+*   **M03:** Security & Supply Chain (Bandit, SBOM, Release Flow).

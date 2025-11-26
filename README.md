@@ -66,5 +66,5 @@ make ci
 * **M00** – Repo & CI Bootstrap (Done).
 * **M01** – UNGAR core card-physics abstraction + 4×14×n tensor encoder (Done).
 * **M02** – Game definitions (High Card Duel) & runner interface (Done).
-* **M03** – Security & supply-chain hardening: Bandit, pip-audit, cyclonedx SBOM, basic SLSA provenance for artifacts.
+* **M03** – Security & supply-chain hardening: Bandit, pip-audit, cyclonedx SBOM, basic SLSA provenance for artifacts (Done).
 * **M04** – RediAI bridge package (separate repo) and Workflow Registry integration.
