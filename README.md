@@ -26,6 +26,13 @@ python -m pip install -r requirements-dev.txt
 make ci
 ```
 
+### Run a Game
+Run a sample High Card Duel episode in Python:
+
+```bash
+python -c "from ungar.games.high_card_duel import make_high_card_duel_spec; from ungar.runner import play_random_episode; print(play_random_episode(make_high_card_duel_spec(), seed=42))"
+```
+
 ## Core Card Tensor
 
 UNGAR represents the 52-card deck (plus optional jokers) as a 4×14×n NumPy tensor:
@@ -56,10 +63,8 @@ make ci
 
 ## Roadmap
 
-* **M00** – Repo & CI Bootstrap (Current).
-* **M01** – UNGAR core card-physics abstraction + 4×13×n tensor encoder stub.
-* **M02** – Game definitions for 1–2 simple games (e.g., High Card Duel + simple trick-taker) + more tests.
+* **M00** – Repo & CI Bootstrap (Done).
+* **M01** – UNGAR core card-physics abstraction + 4×14×n tensor encoder (Done).
+* **M02** – Game definitions (High Card Duel) & runner interface (Done).
 * **M03** – Security & supply-chain hardening: Bandit, pip-audit, cyclonedx SBOM, basic SLSA provenance for artifacts.
 * **M04** – RediAI bridge package (separate repo) and Workflow Registry integration.
-
-

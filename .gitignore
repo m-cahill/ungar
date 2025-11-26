@@ -36,3 +36,5 @@ dmypy.json
 .vscode/
 .idea/
 
+# Project Creaton Files
+Project Files/

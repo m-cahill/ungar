@@ -5,7 +5,11 @@ Welcome to the technical documentation for **UNGAR** (Universal Neural Grid for 
 ## Core Concepts
 
 *   [Project Vision](../VISION.md)
-*   [Core Card Tensor](./core_tensor.md) - The 4×13×n representation.
+*   [Core Card Tensor](./core_tensor.md) - The 4×14×n representation.
+
+## Games
+
+*   [High Card Duel](./games_high_card_duel.md) - Reference implementation.
 
 ## Quality Assurance
 

@@ -47,6 +47,17 @@ assert grid[0, 0] == True   # Spades (0), Ace (0) is present
 assert grid[1, 12] == True  # Hearts (1), King (12) is present
 ```
 
+## Game Integration
+
+Games implement the `GameState` protocol, which includes a `to_tensor(player)` method. This method maps the game's internal state to a `CardTensor` from the perspective of a specific player.
+
+For example, in `HighCardDuel`:
+*   `my_hand`: Contains the card held by the requesting player.
+*   `opponent_hand`: Contains the opponent's card **only if it has been revealed**.
+*   `unseen`: Contains all other cards (deck + unrevealed opponent card).
+
+This partitioning ensures that the tensor perfectly represents the information set available to the agent, maintaining hidden information properties.
+
 ## Relation to RL Frameworks
 
 This structure aligns with state-of-the-art reinforcement learning encodings:
