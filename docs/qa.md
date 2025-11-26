@@ -17,7 +17,7 @@ The following gates are enforced in CI (`make ci`):
 
 M01 introduces the core data structures with strict invariants:
 
-*   **Bijections:** 52-card mapping (`Card` ↔ Index ↔ Tensor Position) is verified via exhaustive unit tests and Hypothesis property tests.
+*   **Bijections:** 56-card mapping (`Card` ↔ Index ↔ Tensor Position) is verified via exhaustive unit tests and Hypothesis property tests.
 *   **Immutability:** `CardTensor` data arrays are read-only to prevent accidental mutation.
 *   **Guardrails:** `validate_exclusive_planes` and `validate_partition` helpers ensure logical consistency of game states.
 
