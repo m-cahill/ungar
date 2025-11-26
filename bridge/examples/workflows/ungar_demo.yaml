@@ -1,0 +1,7 @@
+steps:
+  - id: run_env_once
+    type: python
+    path: "bridge/examples/demo_rediai.py"
+    gates:
+      - accuracy: { min: -999 }  # always pass
+

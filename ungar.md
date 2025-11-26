@@ -16,9 +16,12 @@ src/ungar/
 
 bridge/
 ├── src/ungar_bridge/
-│   ├── adapter_base.py  # BridgeAdapter interface
-│   ├── noop_adapter.py  # Dummy implementation
-│   └── rl_adapter.py    # Gym-like environment wrapper
+│   ├── adapter_base.py    # BridgeAdapter interface
+│   ├── noop_adapter.py    # Dummy implementation
+│   ├── rediai_adapter.py  # RediAI EnvAdapter integration
+│   └── rl_adapter.py      # Gym-like environment wrapper
+└── examples/
+    └── demo_rediai.py     # RediAI workflow demo
 ```
 
 ## Data Schema
@@ -49,3 +52,4 @@ bridge/
 *   **M02:** Game Interfaces & High Card Duel.
 *   **M03:** Security & Supply Chain (Bandit, SBOM, Release Flow).
 *   **M04:** Bridge Package & External Integration.
+*   **M05:** RediAI Integration (Bridge-Level).
