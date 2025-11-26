@@ -11,6 +11,10 @@ Welcome to the technical documentation for **UNGAR** (Universal Neural Grid for 
 
 *   [High Card Duel](./games_high_card_duel.md) - Reference implementation.
 
+## Project Progress
+
+*   [Milestone Summaries](./milestones/index.md) - History of completed milestones.
+
 ## Quality Assurance
 
 *   [QA & Evidence](./qa.md) - Gates, artifacts, and coverage.
