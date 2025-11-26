@@ -1,8 +1,10 @@
+"""Core tensor representation of card collections."""
+
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Iterable, Mapping, Sequence, Tuple
+from typing import Iterable, Mapping, Sequence, Tuple, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -10,7 +12,7 @@ from numpy.typing import NDArray
 from .cards import Card
 from .enums import RANK_COUNT, SUIT_COUNT
 
-BoolTensor = NDArray[np.bool_]
+BoolTensor: TypeAlias = NDArray[np.bool_]
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,6 +27,7 @@ class CardTensorSpec:
     plane_names: Tuple[str, ...]
 
     def __post_init__(self) -> None:
+        """Validate plane names are snake_case."""
         for name in self.plane_names:
             if not re.match(r"^[a-z][a-z0-9_]*$", name):
                 raise ValueError(
@@ -33,6 +36,7 @@ class CardTensorSpec:
 
     @property
     def num_planes(self) -> int:
+        """Return the number of feature planes."""
         return len(self.plane_names)
 
 
@@ -49,6 +53,7 @@ class CardTensor:
     spec: CardTensorSpec
 
     def __post_init__(self) -> None:
+        """Validate tensor shape and enforce immutability."""
         if self.data.shape != (SUIT_COUNT, RANK_COUNT, self.spec.num_planes):
             msg = (
                 "CardTensor data shape must be (4, 14, n); "
@@ -63,6 +68,7 @@ class CardTensor:
 
     @classmethod
     def empty(cls, plane_names: Sequence[str]) -> "CardTensor":
+        """Create an empty tensor (all False) with the given plane names."""
         spec = CardTensorSpec(tuple(plane_names))
         data = np.zeros((SUIT_COUNT, RANK_COUNT, spec.num_planes), dtype=bool)
         return cls(data=data, spec=spec)

@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from ungar.tensor import CardTensor, CardTensorSpec
 
 
@@ -36,9 +35,9 @@ def test_invalid_dtype() -> None:
 def test_invalid_plane_name() -> None:
     with pytest.raises(ValueError, match="must be snake_case"):
         CardTensorSpec(("InvalidName",))
-    
+
     with pytest.raises(ValueError, match="must be snake_case"):
         CardTensorSpec(("invalid-name",))
-    
+
     # Valid names
     CardTensorSpec(("valid_name", "also_valid_123", "x"))

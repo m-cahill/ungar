@@ -1,6 +1,5 @@
 from hypothesis import given
 from hypothesis import strategies as st
-
 from ungar.cards import Card
 
 

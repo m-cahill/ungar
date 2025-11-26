@@ -1,13 +1,17 @@
+"""Core card domain primitives (Suit, Rank, Card)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import ClassVar
 
-from .enums import CARD_COUNT, RANK_COUNT, Rank, Suit
+from .enums import CARD_COUNT, Rank, Suit
 
 
 @dataclass(frozen=True, slots=True)
 class Card:
+    """Immutable representation of a playing card (Suit + Rank)."""
+
     suit: Suit
     rank: Rank
 

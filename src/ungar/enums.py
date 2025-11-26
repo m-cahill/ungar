@@ -1,3 +1,5 @@
+"""Enumerations for card suits and ranks."""
+
 from __future__ import annotations
 
 from enum import Enum, auto
@@ -8,16 +10,21 @@ CARD_COUNT = 56  # 4 suits * 14 ranks
 
 
 class Suit(Enum):
+    """Standard playing card suits."""
+
     SPADES = auto()
     HEARTS = auto()
     DIAMONDS = auto()
     CLUBS = auto()
 
     def __str__(self) -> str:
+        """Return the name of the suit."""
         return self.name
 
 
 class Rank(Enum):
+    """Standard playing card ranks plus Joker."""
+
     ACE = auto()
     TWO = auto()
     THREE = auto()
@@ -34,4 +41,5 @@ class Rank(Enum):
     JOKER = auto()  # Column 13
 
     def __str__(self) -> str:
+        """Return the name of the rank."""
         return self.name

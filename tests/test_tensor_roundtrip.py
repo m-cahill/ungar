@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
-
 from ungar.cards import Card, all_cards
 from ungar.enums import Rank, Suit
 from ungar.tensor import CardTensor
@@ -24,7 +23,7 @@ def test_roundtrip_two_plane_layout() -> None:
 def test_plane_access() -> None:
     tensor = CardTensor.empty(["p1"])
     assert tensor.plane("p1").shape == (4, 14)
-    
+
     with pytest.raises(KeyError):
         tensor.plane("missing")
 
@@ -32,12 +31,12 @@ def test_plane_access() -> None:
 def test_flat_plane() -> None:
     card = Card(Suit.SPADES, Rank.ACE)  # Index 0
     tensor = CardTensor.from_plane_card_map({"one": [card]})
-    
+
     flat = tensor.flat_plane("one")
     assert flat.shape == (56,)
     assert flat[0] is np.True_
     assert flat[1] is np.False_
-    
+
     # Roundtrip flat
     restored = CardTensor.from_flat_plane("one", flat)
     assert set(restored.cards_in_plane("one")) == {card}
