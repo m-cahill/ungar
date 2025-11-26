@@ -69,17 +69,21 @@ def test_game_env_flow() -> None:
     # Step 1
     move = Move(id=0, name="increment")
     state, rewards, done, info = env.step(move)
+    # Cast to MockState to access specific fields not in Protocol
+    assert isinstance(state, MockState)
     assert state.counter == 1
     assert not done
     assert rewards == ()
 
     # Step 2
     state, rewards, done, info = env.step(move)
+    assert isinstance(state, MockState)
     assert state.counter == 2
     assert not done
 
     # Step 3 (Terminal)
     state, rewards, done, info = env.step(move)
+    assert isinstance(state, MockState)
     assert state.counter == 3
     assert done
     assert rewards == (1.0,)

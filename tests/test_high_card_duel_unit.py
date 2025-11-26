@@ -76,7 +76,12 @@ def test_spec_determinism() -> None:
     state2 = spec.initial_state(seed=42)
     state3 = spec.initial_state(seed=999)
 
+    # Test equality
     assert isinstance(state1, HighCardDuelState)
+    assert isinstance(state2, HighCardDuelState)
+    assert isinstance(state3, HighCardDuelState)
+    
+    # Check attributes exist and match
     assert state1.hands == state2.hands
     assert state1.hands != state3.hands  # High probability
 
