@@ -20,7 +20,7 @@ class Episode:
 
 def play_random_episode(spec: GameSpec, seed: int | None = None) -> Episode:
     """Play a full episode using random valid moves."""
-    rng = Random(seed)
+    rng = Random(seed)  # nosec B311: pseudo-random is sufficient for game simulation
     env = GameEnv(spec=spec)
     state = env.reset(seed=seed)
 

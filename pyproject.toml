@@ -22,6 +22,9 @@ dev = [
     "coverage",
     "pydocstyle",
     "hypothesis",
+    "bandit",
+    "pip-audit",
+    "cyclonedx-bom",
 ]
 
 [tool.ruff]
@@ -45,4 +48,3 @@ strict_equality = true
 [tool.pytest.ini_options]
 addopts = "-q --maxfail=1 --disable-warnings --cov=src/ungar --cov-report=xml"
 testpaths = ["tests"]
-

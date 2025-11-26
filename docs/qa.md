@@ -1,6 +1,6 @@
 # QA & Evidence
 
-## Quality Gates (M00)
+## Quality Gates (M00/M03)
 
 The following gates are enforced in CI (`make ci`):
 
@@ -12,6 +12,8 @@ The following gates are enforced in CI (`make ci`):
 | **Docstrings** | `pydocstyle` | Google convention |
 | **Tests** | `pytest` | 100% pass rate |
 | **Coverage** | `coverage.py` | ≥ 85% lines & branches |
+| **Security** | `bandit` | Zero High/Medium issues |
+| **Deps** | `pip-audit` | Zero known vulnerabilities |
 
 ## M01 – Card Tensor
 
@@ -42,8 +44,17 @@ Run the benchmark:
 python scripts/benchmark_tensor.py
 ```
 
-## Artifacts
+## M03 – Security & Supply Chain
 
-CI runs currently produce:
+M03 hardens the repository against security threats.
+
+### Security Gates
+*   **Static Analysis:** Bandit scans source code for insecure patterns.
+*   **Dependency Audit:** Pip-audit checks installed packages for CVEs.
+
+### Release Artifacts
+CI/Release workflows produce:
+*   `dist/*.whl`: The built package.
+*   `dist/sbom.json`: Software Bill of Materials (CycloneDX format).
 *   `coverage.xml`: Coverage report.
-*   `results.sarif`: OpenSSF Scorecard analysis (in GitHub Actions).
+*   `results.sarif`: OpenSSF Scorecard analysis.

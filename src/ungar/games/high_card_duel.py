@@ -112,7 +112,7 @@ class HighCardDuelSpec(GameSpec):
     """Specification for High Card Duel."""
 
     def initial_state(self, seed: int | None = None) -> GameState:
-        rng = Random(seed)
+        rng = Random(seed)  # nosec B311: pseudo-random is sufficient for game simulation
         deck = list(all_cards())
         rng.shuffle(deck)
         hands = (deck[0], deck[1])
