@@ -32,6 +32,7 @@ jobs:
 
       - name: Install Bridge Dependencies
         run: |
+          python -m pip install -e .
           python -m pip install -e bridge
 
       - name: Run CI (Core)
