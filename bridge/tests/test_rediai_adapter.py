@@ -30,12 +30,12 @@ async def test_adapter_api_compliance():
     # 2. Legal moves
     moves = adapter.legal_moves()
     assert len(moves) > 0
-    
+
     # 3. Step
     # HighCardDuel requires 2 moves to finish (one per player)
     move = moves[0]
     next_obs, reward, done, info = await adapter.step(move)
-    
+
     # Check return types for first step
     assert isinstance(next_obs, np.ndarray)
     assert next_obs.shape == (4, 14, 3)
@@ -43,7 +43,7 @@ async def test_adapter_api_compliance():
     assert isinstance(done, bool)
     assert isinstance(info, dict)
     assert done is False  # First move, game not over
-    
+
     # Step again to finish
     moves = adapter.legal_moves()
     assert len(moves) > 0
@@ -69,4 +69,3 @@ def test_make_rediai_env_unknown_game():
         with pytest.raises(ValueError, match="Unknown game"):
             make_rediai_env("invalid_game_name")
     # If not HAS_REDAI, the runtime error takes precedence, which is fine.
-

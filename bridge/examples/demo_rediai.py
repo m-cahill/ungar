@@ -16,10 +16,13 @@ except ImportError:
     @asynccontextmanager
     async def workflow_context() -> Any:
         """Dummy context manager when RediAI is not available."""
+
         class _Dummy:
             async def record_metric(self, name: str, value: float, **kwargs: Any) -> None:
                 print(f"[Mock Recorder] metric={name} value={value}")
+
         yield _Dummy()
+
 
 from ungar_bridge.rediai_adapter import make_rediai_env
 
@@ -35,7 +38,7 @@ async def main() -> None:
         print("Starting episode...")
         obs = await env.reset()
         print(f"Initial observation shape: {obs.shape}")
-        
+
         # Simple loop
         done = False
         step_count = 0
@@ -43,11 +46,11 @@ async def main() -> None:
             legal = env.legal_moves()
             if not legal:
                 break
-                
+
             action = legal[0]  # Just pick the first move
             obs, reward, done, info = await env.step(action)
             step_count += 1
-            
+
             await recorder.record_metric("step_reward", reward, step=step_count)
             print(f"Step {step_count}: reward={reward}, done={done}")
 
@@ -61,4 +64,3 @@ if __name__ == "__main__":
     except RuntimeError as e:
         # Graceful exit if RediAI is missing and we are running manually
         print(f"Skipping execution: {e}")
-

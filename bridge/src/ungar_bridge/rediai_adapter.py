@@ -68,7 +68,7 @@ class RediAIUngarAdapter(EnvAdapter):
             A tuple of (observation, reward, done, info).
         """
         _, rewards, done, info = self.env.step(action)
-        
+
         # RediAI typically expects a single scalar reward for the current agent.
         # UNGAR returns a tuple of rewards for all players.
         # We need to decide whose reward to return.
@@ -77,11 +77,11 @@ class RediAIUngarAdapter(EnvAdapter):
         # Given M05 is "minimal", we will return the reward for player 0 or the acting player.
         # However, step() returns rewards AFTER the move.
         # In a 2-player zero-sum game, if player 0 moved, they might get a reward now.
-        
+
         # Let's sum the rewards for now or pick the first one as a simplification for M05,
         # acknowledging this might need refinement for multi-agent.
         # HighCardDuel returns (reward_p0, reward_p1).
-        
+
         # We will assume single agent training perspective for now (Player 0).
         current_reward = rewards[0] if rewards else 0.0
 
@@ -104,7 +104,7 @@ class RediAIUngarAdapter(EnvAdapter):
             # Should not happen if reset() called
             # Return empty or raise? Raise is safer.
             raise RuntimeError("Environment state is None. Call reset() first.")
-        
+
         # We default to observing from Player 0's perspective for this simple adapter
         # or the current player.
         # If it's a turn-based game, usually we want the observation for the player whose turn it is.
@@ -112,9 +112,9 @@ class RediAIUngarAdapter(EnvAdapter):
         if player_id == -1:
             # Game is over. Default to Player 0 for the terminal observation.
             player_id = 0
-            
+
         tensor = self.env.state.to_tensor(player_id)
-        
+
         # Convert UNGAR's bool tensor to float for ML frameworks if needed,
         # but RediAI contract says "returns 4x14xn tensor".
         # We will return the numpy array.
@@ -140,12 +140,11 @@ def make_rediai_env(game_name: str) -> EnvAdapter:
         )
 
     from ungar.games.high_card_duel import make_high_card_duel_spec
-    
+
     # Simple registry dispatch
     if game_name == "high_card_duel":
         spec = make_high_card_duel_spec()
         env = GameEnv(spec)
         return RediAIUngarAdapter(env)
-    
-    raise ValueError(f"Unknown game: {game_name}")
 
+    raise ValueError(f"Unknown game: {game_name}")

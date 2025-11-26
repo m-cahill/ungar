@@ -12,7 +12,9 @@ if HAS_REDAI:
         HAS_REDAI = False
 
 
-async def run_demo_workflow(workflow_path: str = "bridge/examples/workflows/ungar_demo.yaml") -> Any:
+async def run_demo_workflow(
+    workflow_path: str = "bridge/examples/workflows/ungar_demo.yaml",
+) -> Any:
     """Run the specified workflow using RediAI.
 
     Args:
@@ -31,4 +33,3 @@ async def run_demo_workflow(workflow_path: str = "bridge/examples/workflows/unga
 
     # In a real scenario, this calls RediAI's runner
     return await run_workflow(workflow_path)
-
