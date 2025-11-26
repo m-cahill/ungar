@@ -6,11 +6,16 @@ UNGAR is a unified research environment for imperfect-information card games, de
 
 See [VISION.md](./VISION.md) for the high-level goals, architectural philosophy, and the "moonshot" vision of a General Card Player.
 
-## Architecture Note
+## Architecture: Core vs Bridge
 
-**UNGAR Core** is designed to be framework-agnostic. It does not depend on RediAI or any specific RL framework. A future **bridge package** (in a separate repository) will provide the integration layer to connect UNGAR environments with the RediAI workflow registry, tournaments, and XAI tools.
+UNGAR is split into two packages:
 
-## Quickstart
+1.  **`ungar` (Core)**: Framework-agnostic, pure Python/NumPy logic. Contains cards, tensors, rules, and simulation runner.
+2.  **`ungar-bridge` (Bridge)**: Adapter layer connecting UNGAR to external frameworks (e.g., RediAI, Gym, UI).
+
+This ensures the core remains lightweight and portable.
+
+## Quickstart (Core)
 
 (Assuming Python 3.10+)
 
@@ -67,4 +72,4 @@ make ci
 * **M01** – UNGAR core card-physics abstraction + 4×14×n tensor encoder (Done).
 * **M02** – Game definitions (High Card Duel) & runner interface (Done).
 * **M03** – Security & supply-chain hardening: Bandit, pip-audit, cyclonedx SBOM, basic SLSA provenance for artifacts (Done).
-* **M04** – RediAI bridge package (separate repo) and Workflow Registry integration.
+* **M04** – Bridge Package & External Integration (Done).

@@ -1,3 +1,5 @@
-"""Top-level package for UNGAR."""
+"""Universal Neural Grid for Analysis and Research (UNGAR)."""
 
-from ungar.version import get_version as get_version
+from .version import __version__
+
+__all__ = ["__version__"]

@@ -13,6 +13,12 @@ src/ungar/
 ├── tensor.py     # 4x14xN CardTensor implementation
 └── games/        # Game implementations
     └── high_card_duel.py
+
+bridge/
+├── src/ungar_bridge/
+│   ├── adapter_base.py  # BridgeAdapter interface
+│   ├── noop_adapter.py  # Dummy implementation
+│   └── rl_adapter.py    # Gym-like environment wrapper
 ```
 
 ## Data Schema
@@ -42,3 +48,4 @@ src/ungar/
 *   **M01:** Core Tensor (4x14 grid, partitioning).
 *   **M02:** Game Interfaces & High Card Duel.
 *   **M03:** Security & Supply Chain (Bandit, SBOM, Release Flow).
+*   **M04:** Bridge Package & External Integration.
