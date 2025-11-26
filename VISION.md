@@ -1,8 +1,10 @@
-Project Vision: Universal Neural Grid for Analysis and Research (UNGAR)
-===========================================================
+Here’s the updated `VISION.md` with the 4×14 spec and the new acronym meaning applied. 
+
+```markdown
+Project Vision: Unified Neural Grid for Analysis & Reasoning (UNGAR)
+====================================================================
 
 1. High Concept
-
 ---------------
 
 **Tagline:**
@@ -11,7 +13,7 @@ Project Vision: Universal Neural Grid for Analysis and Research (UNGAR)
 
 Modern research toolkits like RLCard and OpenSpiel provide multiple card environments behind unified APIs, but still treat each game (Poker, Blackjack, UNO, Gin, Bridge, etc.) as a separate environment with its own bespoke encoding and action logic.([rlcard.org](https://rlcard.org/?utm_source=chatgpt.com "RLCard: A Toolkit for Reinforcement Learning in Card Games ..."))
 
-**UNGAR** takes a stronger stance:
+**UNGAR** (Unified Neural Grid for Analysis & Reasoning) takes a stronger stance:
 
 > **All standard deck card games are instances of a single underlying domain.**  
 > Games differ in rules, not in fundamental structure.
@@ -33,7 +35,6 @@ UNGAR is not “a Poker engine” or “a Spades engine.” It is a **unified re
 * * *
 
 2. Core Philosophy
-
 ------------------
 
 ### 2.1 Card Physics, Not Game Scripts
@@ -70,21 +71,29 @@ Everything—from state representation to evaluation and explainability—is des
 
 * * *
 
-3. Architectural Anchor: The 4×13×n Tensor
+3. Architectural Anchor: The 4×14×n Tensor (with a 4×13×n Base)
+----------------------------------------------------------------
 
-------------------------------------------
-
-The **only locked-in technical commitment** is the **4×13×n card tensor** as the _canonical_ internal view of “what’s going on in the deck.”
+The **only locked-in technical commitment** is a **4×14×n card tensor** as the _canonical_ internal view of “what’s going on in the deck,” with a guaranteed **4×13×n base slice** corresponding to the standard 52-card deck.
 
 ### 3.1 The Invariant Card Grid
 
 * **4 rows:** suits (♠ ♥ ♦ ♣) in a fixed, global order.
 
-* **13 columns:** ranks (2–10, J, Q, K, A) in a fixed, global order.
+* **14 columns:** ranks in a fixed, global order:
+  
+  * Columns 0–12: the standard ranks (2–10, J, Q, K, A).
+  
+  * Column 13: a dedicated **JOKER / special rank** column.
 
-* Each position (row, column) uniquely identifies a card in a standard 52-card deck.
+* Each position (row, column 0–12) uniquely identifies a standard card in a 52-card deck.
+* Positions in column 13 identify **joker or special cards**; different rulesets may choose how many of these cells are actually used.
 
-This grid is **game-agnostic**; it doesn’t care if we’re playing Texas Hold’em, Spades, Hearts, or something new.
+This grid is **game-agnostic**; it doesn’t care if we’re playing Texas Hold’em, Spades, Hearts, or something new. It simply ensures that:
+
+* For **52-card games**, the joker column (column 13) is guaranteed to be all zeros.
+* For **54-card decks** (with two jokers), a small, documented subset of joker cells (e.g., “red joker” and “black joker”) are used; the rest remain zero.
+* More exotic games can, in principle, use additional joker/special cells, but must do so via explicit, documented invariants.
 
 ### 3.2 The Flexible n Channels
 
@@ -110,17 +119,29 @@ Along the third dimension, UNGAR maintains **n channels** that encode _how_ each
   
   * In Gin: part of potential melds, deadwood value, knock eligibility, etc.
 
+The joker column participates in these channels just like any other rank: a joker being in hand, on the table, or in the stock is represented by the same ownership/visibility/status features as non-joker cards.
+
+### 3.3 The Canonical 4×13×n Base Slice
+
+Even though the full tensor is 4×14×n, UNGAR treats the **leftmost 4×13×n slice** (standard ranks only) as the **canonical base**:
+
+* All pure 52-card games live entirely within this base slice; the joker column is all zeros.
+* Any model or tool designed for 4×13×n can be extended to 4×14×n by:
+  
+  * Zero-padding the joker column for 52-card rulesets, or
+  
+  * Learning to treat the joker column as an optional extension.
+
 Crucially:
 
-> **All downstream intelligence—RL agents, heuristic evaluators, explainability overlays—must treat this 4×13×n tensor as the primary lens on the game.**
+> **All downstream intelligence—RL agents, heuristic evaluators, explainability overlays—must treat this 4×14×n tensor (with its 4×13×n base) as the primary lens on the game.**
 
 The project encourages—but does not require—downstream models to treat this tensor somewhat analogously to an image, enabling spatial pattern learning (e.g., flushes, sequences, distributions) and cross-game generalization.
 
 * * *
 
 4. What UNGAR Should Strive to Become
-
-------------------------------------
+-------------------------------------
 
 This section is written in “should” language on purpose: it’s an aspirational spec for the LLM and future humans.
 
@@ -130,7 +151,7 @@ UNGAR should:
 
 * Represent **a wide range of card games**—poker variants, trick-taking games, rummy-style games, shedding games—without changing the core representation.
 
-* Allow game designers and researchers to **define new games declaratively** (as rule configurations over the same 4×13×n substrate).
+* Allow game designers and researchers to **define new games declaratively** (as rule configurations over the same 4×14×n substrate).
 
 * Support **multi-player, team, and partnership** structures (e.g., Bridge, Spades partnerships) as first-class concepts.([openspiel.readthedocs.io](https://openspiel.readthedocs.io/en/latest/games.html?utm_source=chatgpt.com "Available games - OpenSpiel documentation"))
 
@@ -166,15 +187,15 @@ The long-term, “moonshot” vision:
 
 UNGAR is **XAI-first** by design:
 
-* The 4×13 grid naturally lends itself to **heatmap overlays**:
+* The 4×14 grid naturally lends itself to **heatmap overlays**:
   
   * Which cards or suits were most influential in the agent’s decision?
   
-  * Which hidden cards did the agent act as if it “believed” were likely?
+  * Which hidden cards (including jokers, if present) did the agent act as if it “believed” were likely?
 
 * Agents should be instrumented to produce:
   
-  * **Per-decision attributions** over the 4×13 grid.
+  * **Per-decision attributions** over the 4×14 grid.
   
   * Simple, structured explanations (e.g., “I avoided leading hearts because they carry penalty risk”).
 
@@ -190,7 +211,7 @@ The goal is not only to **beat baselines**, but to **illuminate card strategy** 
 
 UNGAR aspires to be an **open commons** for imperfect-information card research, similar in spirit to RLCard/OpenSpiel but:
 
-* With a **stronger focus on cross-game representation** (via 4×13×n).
+* With a **stronger focus on cross-game representation** (via 4×14×n, with a 4×13×n base).
 
 * With **community-driven game definitions** contributed as rule sets over the shared substrate.
 
@@ -207,7 +228,6 @@ The project should be architected so that **new games and agents are easy to add
 * * *
 
 5. Relationship to Other Projects (Context, Not Requirements)
-
 -------------------------------------------------------------
 
 This section is to help an LLM understand the landscape; nothing here is prescriptive.
@@ -221,16 +241,17 @@ This section is to help an LLM understand the landscape; nothing here is prescri
 * * *
 
 6. Guiding Principles for Any Implementation
-
 --------------------------------------------
 
 When you later ask an LLM to design architecture, write code, or propose milestones, it should stay aligned with these **high-level principles**:
 
-1. **4×13×n is sacred.**
+1. **4×14×n is canonical; 4×13×n is the base.**
    
-   * All game states and explainability artifacts should be able to flow through this representation.
+   * All game states and explainability artifacts should be able to flow through the 4×14×n representation.
    
-   * The set of channels `n` is extensible, but the base grid shape is stable.
+   * The leftmost 4×13×n slice corresponds to the standard 52-card deck and remains stable across rulesets.
+   
+   * The joker/special column is reserved, explicitly documented, and may be all zeros for many games.
 
 2. **Card physics over ad-hoc scripts.**
    
@@ -249,3 +270,4 @@ When you later ask an LLM to design architecture, write code, or propose milesto
    * Favor clarity and extensibility over hyper-optimized, opaque solutions.
    
    * Make it easy for others to plug in games, agents, and experiments.
+```

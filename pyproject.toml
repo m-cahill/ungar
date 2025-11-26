@@ -9,6 +9,9 @@ description = "Universal Neural Grid for Analysis and Research (UNGAR)"
 authors = [{ name = "Michael Cahill" }]
 requires-python = ">=3.10"
 readme = "README.md"
+dependencies = [
+    "numpy>=1.26,<3.0",
+]
 
 [project.optional-dependencies]
 dev = [

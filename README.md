@@ -26,6 +26,25 @@ python -m pip install -r requirements-dev.txt
 make ci
 ```
 
+## Core Card Tensor
+
+UNGAR represents the 52-card deck (plus optional jokers) as a 4×14×n NumPy tensor:
+
+* Axis 0: suits (Spades, Hearts, Diamonds, Clubs)
+* Axis 1: ranks (Ace through King, plus Joker)
+* Axis 2: feature planes (game-defined)
+
+```python
+from ungar.cards import Card
+from ungar.enums import Suit, Rank
+from ungar.tensor import CardTensor
+
+my_hand = [Card(Suit.SPADES, Rank.ACE), Card(Suit.HEARTS, Rank.KING)]
+tensor = CardTensor.from_plane_card_map({"my_hand": my_hand})
+
+assert set(tensor.cards_in_plane("my_hand")) == set(my_hand)
+```
+
 ## Local CI
 
 To run the same checks that GitHub Actions runs:

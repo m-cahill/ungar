@@ -2,13 +2,15 @@
 
 Welcome to the technical documentation for **UNGAR** (Universal Neural Grid for Analysis and Research).
 
-## Key Links
+## Core Concepts
 
-* [Project Vision](../VISION.md)
-* [QA & Evidence](./qa.md)
-* [GitHub Repository](https://github.com/m-cahill/ungar)
+*   [Project Vision](../VISION.md)
+*   [Core Card Tensor](./core_tensor.md) - The 4×13×n representation.
+
+## Quality Assurance
+
+*   [QA & Evidence](./qa.md) - Gates, artifacts, and coverage.
 
 ## Getting Started
 
 See the [README](../README.md) for installation and quickstart instructions.
-
