@@ -1,0 +1,9 @@
+# This file is manually pinned as pip-compile failed in the environment.
+ruff==0.1.11
+mypy==1.8.0
+pytest==7.4.4
+pytest-cov==4.1.0
+coverage==7.4.0
+pydocstyle==6.3.0
+hypothesis==6.92.1
+

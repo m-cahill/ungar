@@ -1,0 +1,10 @@
+[run]
+branch = True
+source = src/ungar
+
+[report]
+fail_under = 85
+omit =
+  */tests/*
+  **/__init__.py
+
