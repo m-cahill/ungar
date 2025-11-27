@@ -38,13 +38,17 @@ jobs:
       - name: Run CI (Core)
         run: make ci
 
-      - name: Run CI (Bridge)
-        # For now, bridge has no tests, but we should lint it
-        # This assumes we add bridge specific make targets or commands
+      - name: Bridge checks (only if Python files exist)
         run: |
-          ruff check bridge
-          ruff format --check bridge
-          mypy bridge/src
+          # Check if there are any Python files in bridge/src
+          if [ -n "$(find bridge/src -name '*.py' -print -quit)" ]; then
+            ruff check bridge
+            ruff format --check bridge
+            # Run mypy from bridge directory to use its specific config (avoiding root exclude)
+            (cd bridge && mypy src)
+          else
+            echo "No Python files in bridge/src, skipping bridge checks."
+          fi
 
       - name: Upload coverage.xml
         if: always()
