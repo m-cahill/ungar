@@ -1,27 +1,37 @@
 # mypy: ignore-errors
+import os
+import pytest
 import importlib
-import importlib.util
 from typing import Any
 from unittest.mock import patch
 
-import pytest
-
-# Try to locate the demo module in either layout:
-#   - In-repo:   bridge.examples.demo_rediai
-#   - Installed: ungar_bridge.examples.demo_rediai
-spec = importlib.util.find_spec("bridge.examples.demo_rediai") or importlib.util.find_spec(
-    "ungar_bridge.examples.demo_rediai"
-)
-
-if spec is None:
+# Only run this integration smoke test when explicitly enabled.
+if os.environ.get("ENABLE_REDI_SMOKE") != "1":
     pytest.skip(
-        "RediAI demo not available (no bridge.examples.demo_rediai or "
-        "ungar_bridge.examples.demo_rediai); skipping RediAI smoke test.",
+        "RediAI integration tests disabled (set ENABLE_REDI_SMOKE=1 to run).",
         allow_module_level=True,
     )
 
-# Dynamically import whichever module was found.
-demo_rediai = importlib.import_module(spec.name)
+# Try both possible layouts:
+#   - In-repo RediAI:   bridge.examples.demo_rediai
+#   - This repo:        ungar_bridge.examples.demo_rediai
+demo_module = None
+
+for dotted_name in ("bridge.examples.demo_rediai", "ungar_bridge.examples.demo_rediai"):
+    try:
+        demo_module = importlib.import_module(dotted_name)
+        break
+    except ModuleNotFoundError:
+        continue
+
+if demo_module is None:
+    pytest.skip(
+        "RediAI demo not importable (no bridge.examples.demo_rediai or "
+        "ungar_bridge.examples.demo_rediai); skipping.",
+        allow_module_level=True,
+    )
+
+demo_rediai = demo_module
 
 
 class FakeRecorder:
