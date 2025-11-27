@@ -19,7 +19,7 @@ class FakeRecorder:
 
 
 @pytest.mark.asyncio
-async def test_rediai_smoke_demo():
+async def test_rediai_smoke_demo() -> None:
     """Smoke test for the RediAI demo script.
 
     Verifies that demo_rediai.main() runs to completion when RediAI checks are bypassed.
@@ -39,12 +39,12 @@ async def test_rediai_smoke_demo():
 
         from contextlib import asynccontextmanager
 
-        captured_metrics = []
+        captured_metrics: list[tuple[str, float]] = []
 
         @asynccontextmanager
-        async def mock_context():
+        async def mock_context() -> Any:
             class _Mock:
-                async def record_metric(self, name, value, **kwargs):
+                async def record_metric(self, name: str, value: float, **kwargs: Any) -> None:
                     captured_metrics.append((name, value))
 
             yield _Mock()
