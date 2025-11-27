@@ -106,7 +106,7 @@ def train_high_card_duel(
         "epsilon": epsilon,
         "game": "high_card_duel",
     }
-    
+
     if last_overlay:
         config["last_overlay"] = last_overlay
 

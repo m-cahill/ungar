@@ -9,6 +9,7 @@ from ungar_bridge.rediai_training import is_rediai_available, train_high_card_du
 
 class FakeRecorder:
     """Mock recorder to capture metrics."""
+
     def __init__(self) -> None:
         self.metrics: List[Tuple[str, float, dict[str, Any]]] = []
 
@@ -20,7 +21,7 @@ class FakeRecorder:
 @pytest.mark.asyncio
 async def test_train_high_card_duel_rediai_mocked(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test training wrapper with a mocked recorder."""
-    
+
     # Capture recorder instance to inspect later
     recorder_instance = FakeRecorder()
 
@@ -37,14 +38,14 @@ async def test_train_high_card_duel_rediai_mocked(monkeypatch: pytest.MonkeyPatc
 
     # Assertions
     assert len(result.rewards) == num_episodes
-    
+
     # Check that metrics were recorded
     assert len(recorder_instance.metrics) >= 2
-    
+
     metric_names = [m[0] for m in recorder_instance.metrics]
     assert "ungar.high_card.avg_reward" in metric_names
     assert "ungar.high_card.last_reward" in metric_names
-    
+
     # Verify values exist
     for name, value, kwargs in recorder_instance.metrics:
         if name == "ungar.high_card.avg_reward":
@@ -57,4 +58,3 @@ def test_is_rediai_available_logic() -> None:
     # We can't easily change HAS_REDAI at runtime since it's determined at import time,
     # but we can check it returns a boolean.
     assert isinstance(is_rediai_available(), bool)
-

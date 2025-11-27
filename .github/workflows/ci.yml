@@ -39,7 +39,11 @@ jobs:
       - name: Lint and Typecheck (Combined)
         run: |
           ruff check .
-          ruff format --check .
+          if ! ruff format --check .; then
+            echo "## Ruff formatting failed" >> $GITHUB_STEP_SUMMARY
+            echo "Run 'ruff format .' locally and commit the changes." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
           mypy .
 
       - name: Run tests (core + bridge) with coverage

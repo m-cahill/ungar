@@ -30,4 +30,3 @@ def test_zero_overlay() -> None:
     meta = {"foo": "bar"}
     overlay_meta = zero_overlay("test_meta", meta=meta)
     assert overlay_meta.meta == meta
-

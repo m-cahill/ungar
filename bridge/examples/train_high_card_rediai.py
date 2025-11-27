@@ -17,20 +17,21 @@ async def main() -> None:
     parser.add_argument("--episodes", type=int, default=1000, help="Number of episodes")
     parser.add_argument("--epsilon", type=float, default=0.1, help="Exploration rate")
     parser.add_argument("--seed", type=int, default=None, help="Random seed")
-    
+
     args = parser.parse_args()
 
     if not is_rediai_available():
-        print("WARNING: RediAI not installed; running in local-dummy mode (no registry logging).", file=sys.stderr)
+        print(
+            "WARNING: RediAI not installed; running in local-dummy mode (no registry logging).",
+            file=sys.stderr,
+        )
     else:
         print("RediAI detected; metrics will be logged to workflow registry.")
 
     print(f"Starting training: episodes={args.episodes}, epsilon={args.epsilon}, seed={args.seed}")
-    
+
     result = await train_high_card_duel_rediai(
-        num_episodes=args.episodes,
-        epsilon=args.epsilon,
-        seed=args.seed
+        num_episodes=args.episodes, epsilon=args.epsilon, seed=args.seed
     )
 
     if result.rewards:
@@ -42,4 +43,3 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
-

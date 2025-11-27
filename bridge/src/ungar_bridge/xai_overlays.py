@@ -11,12 +11,14 @@ from ungar.tensor import CardTensor
 from ungar.xai import CardOverlay, zero_overlay
 
 
-def make_high_card_overlay(state_tensor: CardTensor, label: str = "high_card_importance") -> CardOverlay:
+def make_high_card_overlay(
+    state_tensor: CardTensor, label: str = "high_card_importance"
+) -> CardOverlay:
     """Generate a heuristic importance overlay for High Card Duel.
-    
+
     This simple overlay highlights the cards in 'my_hand' with importance 1.0,
     representing that the agent's decision is primarily based on their own card.
-    
+
     Args:
         state_tensor: The current game state tensor.
         label: Label for the overlay.
@@ -36,4 +38,3 @@ def make_high_card_overlay(state_tensor: CardTensor, label: str = "high_card_imp
             importance[suit_index, rank_index] = 1.0
 
     return overlay
-

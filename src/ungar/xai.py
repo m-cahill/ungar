@@ -23,6 +23,7 @@ class CardOverlay:
         label: A string label describing what this overlay represents (e.g., 'saliency').
         meta: Additional metadata dictionary.
     """
+
     importance: np.ndarray  # shape (4, 14)
     label: str
     meta: Mapping[str, Any]
@@ -31,7 +32,9 @@ class CardOverlay:
         """Validate shape of importance array."""
         expected_shape = (SUIT_COUNT, RANK_COUNT)
         if self.importance.shape != expected_shape:
-            raise ValueError(f"importance must have shape {expected_shape}, got {self.importance.shape!r}")
+            raise ValueError(
+                f"importance must have shape {expected_shape}, got {self.importance.shape!r}"
+            )
 
 
 def zero_overlay(label: str, meta: Mapping[str, Any] | None = None) -> CardOverlay:
@@ -49,4 +52,3 @@ def zero_overlay(label: str, meta: Mapping[str, Any] | None = None) -> CardOverl
         label=label,
         meta=meta or {},
     )
-
