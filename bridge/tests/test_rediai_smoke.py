@@ -1,9 +1,10 @@
 # mypy: ignore-errors
-import os
-import pytest
 import importlib
+import os
 from typing import Any
 from unittest.mock import patch
+
+import pytest
 
 # Only run this integration smoke test when explicitly enabled.
 if os.environ.get("ENABLE_REDI_SMOKE") != "1":

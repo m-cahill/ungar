@@ -46,3 +46,12 @@ make train-high-card
 
 This runs 1000 episodes and reports average reward. Since High Card Duel is zero-sum and random, the average reward usually converges near 0.0 against a random opponent (or self-play).
 
+### XAI Overlay Scaffold
+
+The training loop supports generating XAI (Explainable AI) overlays for game states.
+
+*   **Structure:** `CardOverlay` (defined in `ungar.xai`).
+*   **Shape:** 4×14 grid of importance values (floats).
+*   **Heuristic:** For High Card Duel, we implement a simple placeholder overlay that highlights the current player's hand with importance `1.0`.
+
+This infrastructure allows the training loop to produce "explanations" alongside rewards, which will be used in future milestones for integration with RediAI's interpretability tools.

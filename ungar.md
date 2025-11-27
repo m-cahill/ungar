@@ -11,17 +11,20 @@ src/ungar/
 ├── game.py       # GameState, GameSpec, Move protocols
 ├── runner.py     # Simulation runner (play_random_episode)
 ├── tensor.py     # 4x14xN CardTensor implementation
+├── xai.py        # Card overlay and XAI data structures
 └── games/        # Game implementations
     └── high_card_duel.py
 
 bridge/
 ├── src/ungar_bridge/
 │   ├── adapter_base.py    # BridgeAdapter interface
-│   ├── noop_adapter.py    # Dummy implementation
 │   ├── rediai_adapter.py  # RediAI EnvAdapter integration
-│   └── rl_adapter.py      # Gym-like environment wrapper
+│   ├── rediai_training.py # Training workflow integration
+│   ├── rl_adapter.py      # Gym-like environment wrapper
+│   └── xai_overlays.py    # Overlay generators
 └── examples/
-    └── demo_rediai.py     # RediAI workflow demo
+    ├── demo_rediai.py     # RediAI workflow demo
+    └── train_high_card_rediai.py # Training CLI
 ```
 
 ## Data Schema
@@ -45,6 +48,15 @@ bridge/
 *   **Rules:** Each player gets 1 card. Reveal. High card wins.
 *   **Tensor Planes:** `my_hand`, `opponent_hand`, `unseen`.
 
+## RediAI-Backed Training (Optional)
+
+You can run training loops that optionally integrate with RediAI's workflow registry.
+
+*   **CLI:** `python bridge/examples/train_high_card_rediai.py`
+*   **Function:** `ungar_bridge.rediai_training.train_high_card_duel_rediai`
+
+If RediAI is installed, metrics like average reward are logged to the workflow. If not, the script runs in a local-dummy mode, printing a warning but completing successfully.
+
 ## Milestones
 
 *   **M00:** Foundation (Repo, CI).
@@ -54,6 +66,8 @@ bridge/
 *   **M04:** Bridge Package & External Integration.
 *   **M05:** RediAI Integration (Bridge-Level).
 *   **M06:** Bridge Quality & Coverage Hardening.
+*   **M07:** Codebase Audit & Refinement.
+*   **M08:** RediAI Training Workflow & XAI Scaffold (Done).
 
 ## Documentation
 

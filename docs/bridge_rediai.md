@@ -38,6 +38,21 @@ action = env.legal_moves()[0]
 obs, reward, done, info = await env.step(action)
 ```
 
+### Training Workflow
+
+You can run training loops that hook into RediAI's `WorkflowRecorder`. This allows you to log metrics, artifacts, and events to the RediAI registry.
+
+```python
+from ungar_bridge.rediai_training import train_high_card_duel_rediai
+
+# Run training (async)
+# Logs metrics to RediAI if installed
+result = await train_high_card_duel_rediai(num_episodes=5000)
+print(f"Final Avg Reward: {sum(result.rewards)/len(result.rewards)}")
+```
+
+Under the hood, this uses RediAI's `workflow_context` to capture metrics. If RediAI is not available, a dummy context is used so your code remains portable.
+
 ### Running the Demo Workflow
 
 A demonstration workflow is provided in `bridge/examples/demo_rediai.py`.
@@ -76,4 +91,3 @@ Run it via:
 python bridge/benchmarks/benchmark_rediai_adapter.py
 ```
 This script measures `encode_state` latency and is run in CI (non-gating) to track performance trends.
-

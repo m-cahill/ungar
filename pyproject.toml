@@ -58,5 +58,5 @@ follow_imports = "skip"
 disable_error_code = ["import-untyped"]
 
 [tool.pytest.ini_options]
-addopts = "-q --maxfail=1 --disable-warnings --cov=src/ungar --cov-report=xml"
-testpaths = ["tests"]
+addopts = "-q --maxfail=1 --disable-warnings --cov=src/ungar --cov=bridge/src/ungar_bridge --cov-report=xml"
+testpaths = ["tests", "bridge/tests"]

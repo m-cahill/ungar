@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from ungar.game import GameEnv
 from ungar.games.high_card_duel import make_high_card_duel_spec
 
 from .rl_adapter import UngarGymEnv
+from .xai_overlays import make_high_card_overlay
 
 
 @dataclass
@@ -18,13 +19,14 @@ class TrainingResult:
 
     rewards: List[float]
     episode_lengths: List[int]
-    config: Dict[str, float | int | str | None]
+    config: Dict[str, Any]
 
 
 def train_high_card_duel(
     num_episodes: int = 1000,
     seed: int | None = None,
     epsilon: float = 0.1,
+    record_overlays: bool = False,
 ) -> TrainingResult:
     """Run a simple bandit-style training loop for High Card Duel.
 
@@ -32,6 +34,7 @@ def train_high_card_duel(
         num_episodes: Number of episodes to run.
         seed: Random seed for reproducibility.
         epsilon: Epsilon-greedy exploration rate.
+        record_overlays: If True, generate an XAI overlay for the last episode.
 
     Returns:
         TrainingResult containing rewards and episode lengths.
@@ -53,6 +56,7 @@ def train_high_card_duel(
 
     rewards_history: List[float] = []
     lengths_history: List[int] = []
+    last_overlay: Any = None
 
     for i in range(num_episodes):
         episode_seed = seed + i if seed is not None else None
@@ -79,18 +83,35 @@ def train_high_card_duel(
             steps += 1
 
             if terminated or truncated:
+                # If this is the last episode and we are recording overlays
+                if record_overlays and i == num_episodes - 1:
+                    # We need the state tensor. The environment is terminal.
+                    # UngarGymEnv doesn't expose the raw state tensor easily via public properties
+                    # other than via step return (which is observation), but that might be
+                    # P0's observation.
+                    # We can access the underlying GameEnv state directly.
+                    if env.game_env.state:
+                        # We want to explain the state from the perspective of Player 0 usually.
+                        # High Card Duel state tensor has 'my_hand' etc. relative to the requested player.
+                        tensor = env.game_env.state.to_tensor(player=0)
+                        last_overlay = make_high_card_overlay(tensor)
                 break
 
         rewards_history.append(episode_reward)
         lengths_history.append(steps)
 
+    config: Dict[str, Any] = {
+        "num_episodes": num_episodes,
+        "seed": seed,
+        "epsilon": epsilon,
+        "game": "high_card_duel",
+    }
+    
+    if last_overlay:
+        config["last_overlay"] = last_overlay
+
     return TrainingResult(
         rewards=rewards_history,
         episode_lengths=lengths_history,
-        config={
-            "num_episodes": num_episodes,
-            "seed": seed,
-            "epsilon": epsilon,
-            "game": "high_card_duel",
-        },
+        config=config,
     )
