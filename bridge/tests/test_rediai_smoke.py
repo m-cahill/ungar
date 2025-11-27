@@ -1,27 +1,28 @@
+# mypy: ignore-errors
+import importlib
 import importlib.util
 from typing import Any
 from unittest.mock import patch
 
 import pytest
 
-# Try both possible package layouts:
-# - in-repo tests (bridge.examples)
-# - installed package (ungar_bridge.examples)
-bridge_spec = importlib.util.find_spec("bridge.examples")
-ungar_bridge_spec = importlib.util.find_spec("ungar_bridge.examples")
+# Try to locate the demo module in either layout:
+#   - In-repo:   bridge.examples.demo_rediai
+#   - Installed: ungar_bridge.examples.demo_rediai
+spec = (
+    importlib.util.find_spec("bridge.examples.demo_rediai")
+    or importlib.util.find_spec("ungar_bridge.examples.demo_rediai")
+)
 
-if bridge_spec is not None:
-    import bridge.examples as _demo_mod
-elif ungar_bridge_spec is not None:
-    import ungar_bridge.examples as _demo_mod
-else:
+if spec is None:
     pytest.skip(
-        "bridge/RediAI demo not available (no bridge.examples or ungar_bridge.examples); "
-        "skipping RediAI smoke test.",
+        "RediAI demo not available (no bridge.examples.demo_rediai or "
+        "ungar_bridge.examples.demo_rediai); skipping RediAI smoke test.",
         allow_module_level=True,
     )
 
-demo_rediai = _demo_mod.demo_rediai
+# Dynamically import whichever module was found.
+demo_rediai = importlib.import_module(spec.name)
 
 
 class FakeRecorder:
