@@ -9,7 +9,7 @@ from typing import Any
 
 # Handle RediAI import gracefully for CI/testing without RediAI installed
 try:
-    from RediAI.registry.recorder import workflow_context  # type: ignore[import-untyped]
+    from RediAI.registry.recorder import workflow_context
 except ImportError:
     from contextlib import asynccontextmanager
 
