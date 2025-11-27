@@ -56,14 +56,17 @@ jobs:
         if: success() && hashFiles('coverage.xml') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-xml
+          name: coverage-xml-${{ matrix.python-version }}
           path: coverage.xml
           if-no-files-found: warn
+          overwrite: true
 
       - name: Generate SBOM (M03-B)
         run: |
-          cyclonedx-py poetry --force --output-format json --output-file sbom-${{ matrix.python-version }}.json || \
-          cyclonedx-py pip --force --output-format json --output-file sbom-${{ matrix.python-version }}.json
+          # Use 'environment' command which inspects current environment
+          # Or if requirements.txt exists: cyclonedx-py requirements ...
+          # But for the installed environment:
+          cyclonedx-py environment --output-format json --output-file sbom-${{ matrix.python-version }}.json
         continue-on-error: true
 
       - name: Upload SBOM
