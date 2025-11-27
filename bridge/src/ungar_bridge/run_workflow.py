@@ -6,7 +6,7 @@ from .rediai_adapter import HAS_REDAI
 
 if HAS_REDAI:
     try:
-        from RediAI.cli import run_workflow  # type: ignore[import-not-found]
+        from RediAI.cli import run_workflow  # type: ignore[import-untyped]
     except ImportError:
         # Should not happen if HAS_REDAI is True, unless RediAI structure changed
         HAS_REDAI = False

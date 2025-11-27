@@ -1,16 +1,59 @@
-# UNGAR Bridge Package
+# UNGAR Bridge
 
-This is the bridge/adapter layer for UNGAR. It provides integrations with external frameworks (e.g., RediAI, Gym) without coupling the core `ungar` library to them.
+This package provides the integration layer between **UNGAR** core games and the **RediAI** platform. It allows UNGAR environments to be wrapped and used within RediAI workflows for training, evaluation, and tournaments.
+
+See [VISION.md](../../VISION.md) and [ungar.md](../../ungar.md) for project context.
 
 ## Installation
 
+### Development
+From the repository root:
 ```bash
-pip install ungar-bridge
+pip install -e .
+pip install -e bridge
 ```
 
-(Note: This requires `ungar` core to be installed).
+### With RediAI Support
+To enable the RediAI integration (requires RediAI access):
+```bash
+pip install "ungar-bridge[rediai]"
+```
 
-## Usage
+## Quickstart
 
-See `docs/bridge.md` in the main repository for details on adapters.
+This example shows how to wrap `HighCardDuel` and run a simple step using the RediAI adapter.
 
+```python
+import asyncio
+from ungar_bridge.rediai_adapter import make_rediai_env
+
+async def main():
+    # 1. Create the adapter
+    #    (Raises RuntimeError if RediAI is not installed/available)
+    env = make_rediai_env("high_card_duel")
+
+    # 2. Reset (returns 4x14xN tensor)
+    obs = await env.reset()
+    print(f"Observation shape: {obs.shape}")
+
+    # 3. Step
+    moves = env.legal_moves()
+    next_obs, reward, done, info = await env.step(moves[0])
+    print(f"Reward: {reward}, Done: {done}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+See `bridge/examples/demo_rediai.py` for a more complete example with workflow recording.
+
+## Optional Dependency
+
+The bridge package is designed to be **safe to import** even without RediAI.
+It checks for `RediAI` at runtime. If missing:
+*   Importing `ungar_bridge.rediai_adapter` works (using protocol stubs).
+*   Calling `make_rediai_env` or instantiating `RediAIUngarAdapter` raises a clear `RuntimeError`.
+
+## Documentation
+
+For detailed architecture and usage, see [docs/bridge_rediai.md](../../docs/bridge_rediai.md).

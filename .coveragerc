@@ -1,12 +1,12 @@
 [run]
 branch = True
-source = src/ungar
+source =
+    src/ungar
+    bridge/src/ungar_bridge
 
 [report]
 fail_under = 85
+show_missing = True
 omit =
-  */tests/*
-  **/__init__.py
-
-
-
+    */tests/*
+    **/__init__.py

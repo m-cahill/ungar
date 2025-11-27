@@ -35,26 +35,27 @@ jobs:
           python -m pip install -e .
           python -m pip install -e bridge
 
-      - name: Run CI (Core)
-        run: make ci
-
-      - name: Bridge checks (only if Python files exist)
+      - name: Lint and Typecheck (Combined)
         run: |
-          # Check if there are any Python files in bridge/src
-          if [ -n "$(find bridge/src -name '*.py' -print -quit)" ]; then
-            ruff check bridge
-            ruff format --check bridge
-            # Run mypy from bridge directory to use its specific config (avoiding root exclude)
-            (cd bridge && mypy src)
-          else
-            echo "No Python files in bridge/src, skipping bridge checks."
-          fi
+          ruff check .
+          ruff format --check .
+          mypy .
+
+      - name: Run tests (core + bridge) with coverage
+        run: |
+          pytest src tests bridge/tests \
+            --cov=src/ungar \
+            --cov=bridge/src/ungar_bridge \
+            --cov-report=xml \
+            --cov-report=term-missing
+          # Enforce coverage threshold explicitly if .coveragerc isn't picked up automatically by pytest-cov for fail_under
+          coverage report --fail-under=85
 
       - name: Upload coverage.xml
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.python-version }}
+          name: coverage-xml
           path: coverage.xml
 
       - name: Generate SBOM (M03-B)
@@ -69,6 +70,18 @@ jobs:
         with:
           name: sbom-${{ matrix.python-version }}
           path: sbom-${{ matrix.python-version }}.json
+
+      - name: Adapter micro-benchmark (non-gating)
+        if: always()
+        run: |
+          python bridge/benchmarks/benchmark_rediai_adapter.py | tee adapter_benchmark.txt
+
+      - name: Upload adapter benchmark
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adapter-benchmark
+          path: adapter_benchmark.txt
 
       - name: CI summary
         if: always()

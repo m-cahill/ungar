@@ -53,3 +53,9 @@ bridge/
 *   **M03:** Security & Supply Chain (Bandit, SBOM, Release Flow).
 *   **M04:** Bridge Package & External Integration.
 *   **M05:** RediAI Integration (Bridge-Level).
+*   **M06:** Bridge Quality & Coverage Hardening.
+
+## Documentation
+
+*   [bridge/README.md](bridge/README.md): Bridge package usage.
+*   [docs/bridge_rediai.md](docs/bridge_rediai.md): Detailed RediAI integration docs.

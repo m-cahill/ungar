@@ -68,3 +68,12 @@ To add support for a new game:
 - **Bridge**: `ungar-bridge` depends on `ungar` and optionally `RediAI`.
 - **Guardrails**: All RediAI imports are guarded. If RediAI is missing, the bridge falls back to stub protocols to allow type checking and local tests to pass.
 
+## Performance
+
+The bridge includes a micro-benchmark to ensure the adapter overhead remains minimal.
+Run it via:
+```bash
+python bridge/benchmarks/benchmark_rediai_adapter.py
+```
+This script measures `encode_state` latency and is run in CI (non-gating) to track performance trends.
+

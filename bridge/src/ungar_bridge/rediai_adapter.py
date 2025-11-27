@@ -16,7 +16,7 @@ from ungar.game import GameEnv, Move
 HAS_REDAI = True
 
 try:
-    from RediAI.env import EnvAdapter  # type: ignore[import-not-found]
+    from RediAI.env import EnvAdapter  # type: ignore[import-untyped]
 except ImportError:
     HAS_REDAI = False
 
@@ -34,6 +34,11 @@ except ImportError:
 
         def encode_state(self) -> Any:
             """Return state encoding."""
+
+
+def is_rediai_available() -> bool:
+    """Return True if RediAI is installed and available."""
+    return HAS_REDAI
 
 
 # --- Adapter Implementation ---
@@ -134,7 +139,7 @@ def make_rediai_env(game_name: str) -> EnvAdapter:
         RuntimeError: If RediAI is not installed.
         ValueError: If the game name is unknown.
     """
-    if not HAS_REDAI:
+    if not is_rediai_available():
         raise RuntimeError(
             "RediAI is not installed. Install with `pip install ungar-bridge[rediai]`."
         )

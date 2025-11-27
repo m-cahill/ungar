@@ -22,9 +22,9 @@ async def test_rediai_smoke_demo():
 
     Verifies that demo_rediai.main() runs to completion when RediAI checks are bypassed.
     """
-
-    # We patch HAS_REDAI in the adapter module to allow make_rediai_env to succeed
-    with patch("ungar_bridge.rediai_adapter.HAS_REDAI", True):
+    
+    # We patch is_rediai_available in the adapter module to allow make_rediai_env to succeed
+    with patch("ungar_bridge.rediai_adapter.is_rediai_available", return_value=True):
         # We also need to patch workflow_context in the demo script to capture metrics
         # (Though the demo script already has a dummy fallback, for testing we might want to inspect calls)
         # But for smoke test "runs through without runtime errors" is the main goal.

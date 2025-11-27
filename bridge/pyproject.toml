@@ -26,22 +26,7 @@ rediai = [
     "rediai>=2.1.0",
 ]
 
-[tool.ruff]
-line-length = 100
-target-version = "py310"
-fix = true
-
-[tool.ruff.lint]
-extend-select = ["I"]  # import sorting
-
-[tool.mypy]
-python_version = "3.10"
-check_untyped_defs = true
-disallow_incomplete_defs = true
-disallow_untyped_defs = true
-warn_unused_ignores = true
-no_implicit_optional = true
-strict_equality = true
+# Removed tool configurations to inherit from root pyproject.toml per M06 A3
 
 [tool.pytest.ini_options]
 addopts = "-q --maxfail=1 --disable-warnings"
