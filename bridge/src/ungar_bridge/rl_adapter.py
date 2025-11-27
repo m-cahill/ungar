@@ -37,15 +37,13 @@ class UngarGymEnv(UngarRLAdapter):
         """
         state = self.game_env.reset(seed=seed)
         self._current_player = state.current_player()
-        
+
         # Get observation for the current player
         tensor = state.to_tensor(self._current_player)
-        
+
         return tensor.data, {}
 
-    def step(
-        self, action: int
-    ) -> Tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+    def step(self, action: int) -> Tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
         """Execute a step using the given action index.
 
         Args:
@@ -64,49 +62,49 @@ class UngarGymEnv(UngarRLAdapter):
             raise RuntimeError("Cannot step a terminated environment.")
 
         legal_moves = state.legal_moves()
-        
+
         # Convert index to actual Move object
         # Note: This relies on legal_actions() returning indices 0..len(legal)-1
         # or using the Move.id directly?
-        # The protocol says step(action: int). 
+        # The protocol says step(action: int).
         # A common RL pattern is Discrete(N) where action is an index into the full action space.
         # However, for variable legal moves, we usually pass the index into the legal moves list
         # OR the Move.id if the action space is fixed max size.
         # For High Card Duel, Move.id is stable (0=reveal).
-        
-        # Let's support action as an index into the *current* legal moves for simplicity 
+
+        # Let's support action as an index into the *current* legal moves for simplicity
         # in this masked-action setting, or map it if we had a full action space.
         # Given "legal_actions() -> list[int]", let's assume these are indices into a fixed action space
         # OR Move IDs.
         # HighCardDuel only has one move type "reveal" (id=0).
-        
+
         # If the input `action` corresponds to a Move.id:
         target_move = None
         for move in legal_moves:
             if move.id == action:
                 target_move = move
                 break
-        
+
         if target_move is None:
-             raise ValueError(f"Illegal action {action} for current player {self._current_player}")
+            raise ValueError(f"Illegal action {action} for current player {self._current_player}")
 
         # Apply move
         next_state, rewards, done, info = self.game_env.step(target_move)
-        
+
         # Reward for the player who acted
         step_reward = 0.0
         if done:
             # If game ended, we get rewards.
             # rewards tuple matches player indices.
             step_reward = rewards[self._current_player]
-        
+
         # Update current player
         # If done, current_player might be meaningless (-1), but usually last player stays?
         # UNGAR HighCardDuelState returns -1 when terminal.
-        # We should stick to the player who just acted or 0? 
+        # We should stick to the player who just acted or 0?
         # For RL loop (obs, reward...), we need the obs for the *next* agent to act.
         # If done, obs usually is final state for someone.
-        
+
         if done:
             # Game over. No next player.
             # We can return the state for the player who just acted, or default P0.
@@ -117,13 +115,13 @@ class UngarGymEnv(UngarRLAdapter):
 
         # Get observation for the *next* player (or P0 if done)
         tensor = next_state.to_tensor(self._current_player)
-        
+
         return (
             tensor.data,
             step_reward,
             done,
             False,  # truncated
-            dict(info)
+            dict(info),
         )
 
     def legal_actions(self) -> List[int]:

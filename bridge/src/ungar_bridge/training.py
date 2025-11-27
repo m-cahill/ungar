@@ -46,41 +46,41 @@ def train_high_card_duel(
     # So a Q-table is trivial (1 state -> 1 action).
     # But to demonstrate the loop, we'll pretend there's something to learn or track.
     # We will just track average reward.
-    
+
     # 3. Setup PRNG
     # We use python's random for action selection and env seeding
     rng = random.Random(seed)
-    
+
     rewards_history: List[float] = []
     lengths_history: List[int] = []
 
     for i in range(num_episodes):
         episode_seed = seed + i if seed is not None else None
         env.reset(seed=episode_seed)
-        
+
         episode_reward = 0.0
         steps = 0
-        
+
         # Simple rollout loop
         while True:
             legal = env.legal_actions()
             if not legal:
                 break
-                
+
             # Epsilon-greedy (trivial here since len(legal)==1)
             if rng.random() < epsilon:
                 action = rng.choice(legal)
             else:
                 # Greedy: pick first (trivial)
                 action = legal[0]
-            
+
             _, reward, terminated, truncated, _ = env.step(action)
             episode_reward += reward
             steps += 1
-            
+
             if terminated or truncated:
                 break
-        
+
         rewards_history.append(episode_reward)
         lengths_history.append(steps)
 
@@ -94,4 +94,3 @@ def train_high_card_duel(
             "game": "high_card_duel",
         },
     )
-

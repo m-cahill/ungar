@@ -33,9 +33,7 @@ class UngarRLAdapter(Protocol):
         """Reset the environment."""
         ...
 
-    def step(
-        self, action: int
-    ) -> Tuple[Any, float, bool, bool, dict[str, Any]]:
+    def step(self, action: int) -> Tuple[Any, float, bool, bool, dict[str, Any]]:
         """Execute a step in the environment."""
         ...
 

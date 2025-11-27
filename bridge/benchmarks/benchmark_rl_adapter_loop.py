@@ -7,14 +7,15 @@ from ungar_bridge.rl_adapter import UngarGymEnv
 
 EPISODES = 500
 
+
 def run_benchmark() -> dict:
     spec = make_high_card_duel_spec()
     game_env = GameEnv(spec)
     env = UngarGymEnv(game_env)
-    
+
     lengths = []
     times = []
-    
+
     for _ in range(EPISODES):
         t0 = perf_counter()
         # Reset returns (obs, info)
@@ -32,12 +33,13 @@ def run_benchmark() -> dict:
                 break
         times.append(perf_counter() - t0)
         lengths.append(length)
-        
+
     return {
         "episodes": EPISODES,
         "avg_episode_ms": mean(times) * 1000,
         "avg_len": mean(lengths),
     }
+
 
 if __name__ == "__main__":
     result = run_benchmark()
@@ -46,4 +48,3 @@ if __name__ == "__main__":
         f"avg episode time: {result['avg_episode_ms']:.3f} ms, "
         f"avg length: {result['avg_len']:.2f}"
     )
-

@@ -53,5 +53,3 @@ def test_validation_unknown_plane() -> None:
     tensor = CardTensor.empty(["a"])
     with pytest.raises(KeyError, match="Unknown plane"):
         tensor.validate_exclusive_planes(["b"])
-
-

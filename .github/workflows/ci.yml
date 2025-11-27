@@ -81,8 +81,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: adapter-benchmark
+          name: adapter-benchmark-py${{ matrix.python-version }}
           path: adapter_benchmark.txt
+          if-no-files-found: warn
+          overwrite: true
 
       - name: RL adapter benchmark (non-gating)
         if: always()
@@ -93,8 +95,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rl-adapter-benchmark
+          name: rl-adapter-benchmark-py${{ matrix.python-version }}
           path: rl_adapter_benchmark.txt
+          if-no-files-found: warn
+          overwrite: true
 
       - name: CI summary
         if: success() && hashFiles('coverage.xml') != ''
