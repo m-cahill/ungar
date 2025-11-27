@@ -55,3 +55,21 @@ The training loop supports generating XAI (Explainable AI) overlays for game sta
 *   **Heuristic:** For High Card Duel, we implement a simple placeholder overlay that highlights the current player's hand with importance `1.0`.
 
 This infrastructure allows the training loop to produce "explanations" alongside rewards, which will be used in future milestones for integration with RediAI's interpretability tools.
+
+#### Enabling Overlays
+
+Pass `record_overlays=True` to the training function:
+
+```python
+result = train_high_card_duel(..., record_overlays=True)
+# Access overlay for the last episode
+overlay = result.config["last_overlay"]
+```
+
+### Reward Decomposition (RewardLab)
+
+The training loop also decomposes rewards into components for finer-grained analysis:
+*   `win_loss`: The raw game outcome.
+*   `baseline`: A baseline component (currently 0.0).
+
+These components are stored in `result.components` and can be exported to RediAI RewardLab.

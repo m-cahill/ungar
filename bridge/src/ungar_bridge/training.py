@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Mapping
 
 from ungar.game import GameEnv
 from ungar.games.high_card_duel import make_high_card_duel_spec
 
 from .rl_adapter import UngarGymEnv
 from .xai_overlays import make_high_card_overlay
+
+RewardComponents = Mapping[str, float]
 
 
 @dataclass
@@ -20,6 +22,7 @@ class TrainingResult:
     rewards: List[float]
     episode_lengths: List[int]
     config: Dict[str, Any]
+    components: List[RewardComponents]
 
 
 def train_high_card_duel(
@@ -56,6 +59,7 @@ def train_high_card_duel(
 
     rewards_history: List[float] = []
     lengths_history: List[int] = []
+    components_history: List[RewardComponents] = []
     last_overlay: Any = None
 
     for i in range(num_episodes):
@@ -100,6 +104,14 @@ def train_high_card_duel(
         rewards_history.append(episode_reward)
         lengths_history.append(steps)
 
+        # Decompose reward
+        components_history.append(
+            {
+                "win_loss": episode_reward,
+                "baseline": 0.0,
+            }
+        )
+
     config: Dict[str, Any] = {
         "num_episodes": num_episodes,
         "seed": seed,
@@ -114,4 +126,5 @@ def train_high_card_duel(
         rewards=rewards_history,
         episode_lengths=lengths_history,
         config=config,
+        components=components_history,
     )

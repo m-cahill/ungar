@@ -2,7 +2,12 @@
 
 import numpy as np
 import pytest
-from ungar.xai import CardOverlay, zero_overlay
+from ungar.xai import (
+    CardOverlay,
+    overlay_from_dict,
+    overlay_to_dict,
+    zero_overlay,
+)
 
 
 def test_card_overlay_shape_validation() -> None:
@@ -30,3 +35,34 @@ def test_zero_overlay() -> None:
     meta = {"foo": "bar"}
     overlay_meta = zero_overlay("test_meta", meta=meta)
     assert overlay_meta.meta == meta
+
+
+def test_overlay_serialization_roundtrip() -> None:
+    """Test overlay_to_dict and overlay_from_dict roundtrip."""
+    # Create an overlay with some data
+    importance = np.zeros((4, 14))
+    importance[0, 0] = 1.0  # Ace of Spades
+    importance[3, 13] = 0.5  # Joker
+
+    meta = {"game": "test", "round": 1}
+    original = CardOverlay(importance=importance, label="test_roundtrip", meta=meta)
+
+    # Serialize
+    data = overlay_to_dict(original)
+
+    # Verify structure
+    assert data["label"] == "test_roundtrip"
+    assert data["meta"] == meta
+    assert isinstance(data["importance"], list)
+    assert len(data["importance"]) == 4
+    assert len(data["importance"][0]) == 14
+    assert data["importance"][0][0] == 1.0
+
+    # Deserialize
+    reconstructed = overlay_from_dict(data)
+
+    # Verify
+    assert reconstructed.label == original.label
+    assert reconstructed.meta == original.meta
+    assert np.array_equal(reconstructed.importance, original.importance)
+    assert reconstructed.importance.dtype == float

@@ -53,6 +53,22 @@ print(f"Final Avg Reward: {sum(result.rewards)/len(result.rewards)}")
 
 Under the hood, this uses RediAI's `workflow_context` to capture metrics. If RediAI is not available, a dummy context is used so your code remains portable.
 
+### XAI & RewardLab Integration
+
+The training loop also supports advanced artifacts for Explainable AI (XAI) and Reward Decomposition.
+
+#### XAI Overlays
+When `record_overlays=True` is passed to the training function:
+1. An XAI overlay (attribution map) is generated for the final episode.
+2. It is serialized to JSON and attached as an artifact named `ungar_high_card_overlays.json`.
+3. This artifact can be visualized in RediAI dashboards.
+
+#### Reward Decomposition
+High Card Duel training automatically logs reward decomposition data:
+1. Each episode's reward is broken down into components (e.g., `win_loss`, `baseline`).
+2. This data is serialized to `ungar_reward_decomposition.json`.
+3. It enables granular analysis via RediAI's RewardLab tools.
+
 ### Running the Demo Workflow
 
 A demonstration workflow is provided in `bridge/examples/demo_rediai.py`.

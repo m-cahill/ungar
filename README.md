@@ -66,6 +66,28 @@ python -m pip install -r requirements-dev.txt
 make ci
 ```
 
+## Local dev (pre-commit)
+
+```bash
+pip install pre-commit
+pre-commit install
+pre-commit run --all-files  # run all checks
+```
+
+### Run all checks (Linux/macOS/Windows)
+
+```bash
+python scripts/run_all_checks.py
+```
+
+## RediAI Integration (M09)
+
+M09 adds deep integration with RediAI's XAI and RewardLab ecosystems.
+
+*   **XAI Overlays:** Training runs can now log "explanation" artifacts (card attribution maps) to the RediAI registry.
+*   **Reward Decomposition:** Rewards are broken down into components (win/loss, baseline) and logged for RewardLab analysis.
+*   See [docs/bridge_rediai.md](docs/bridge_rediai.md) for details.
+
 ## Roadmap
 
 * **M00** – Repo & CI Bootstrap (Done).

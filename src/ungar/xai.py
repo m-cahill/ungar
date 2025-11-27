@@ -7,7 +7,7 @@ and saliency maps to be represented consistently across different games.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any, Mapping, TypedDict, cast
 
 import numpy as np
 
@@ -52,3 +52,42 @@ def zero_overlay(label: str, meta: Mapping[str, Any] | None = None) -> CardOverl
         label=label,
         meta=meta or {},
     )
+
+
+class CardOverlayDict(TypedDict):
+    """Dictionary representation of a CardOverlay for serialization."""
+
+    importance: list[list[float]]
+    label: str
+    meta: dict[str, Any]
+
+
+def overlay_to_dict(overlay: CardOverlay) -> CardOverlayDict:
+    """Convert CardOverlay to a JSON-serializable dictionary.
+
+    Args:
+        overlay: The overlay to serialize.
+
+    Returns:
+        A dictionary with 'importance' as a nested list.
+    """
+    # numpy tolist() returns nested lists for 2D arrays
+    importance_list = overlay.importance.tolist()
+    return {
+        "importance": cast(list[list[float]], importance_list),
+        "label": overlay.label,
+        "meta": dict(overlay.meta),
+    }
+
+
+def overlay_from_dict(data: CardOverlayDict) -> CardOverlay:
+    """Reconstruct CardOverlay from a dictionary.
+
+    Args:
+        data: Dictionary created by overlay_to_dict.
+
+    Returns:
+        Reconstructed CardOverlay instance.
+    """
+    arr = np.array(data["importance"], dtype=float)
+    return CardOverlay(importance=arr, label=data["label"], meta=data["meta"])

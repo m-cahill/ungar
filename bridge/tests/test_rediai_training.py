@@ -12,10 +12,15 @@ class FakeRecorder:
 
     def __init__(self) -> None:
         self.metrics: List[Tuple[str, float, dict[str, Any]]] = []
+        self.artifacts: List[Tuple[str, str]] = []
 
     async def record_metric(self, name: str, value: float, **kwargs: Any) -> None:
         """Store metric calls."""
         self.metrics.append((name, value, kwargs))
+
+    async def record_artifact(self, name: str, path: str, **kwargs: Any) -> None:
+        """Store artifact calls."""
+        self.artifacts.append((name, path))
 
 
 @pytest.mark.asyncio
