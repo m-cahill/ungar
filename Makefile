@@ -37,3 +37,11 @@ test-all:
 .PHONY: demo-bridge
 demo-bridge:
 	python -m bridge.examples.demo_rediai
+
+.PHONY: train-high-card
+train-high-card:
+	python bridge/examples/train_high_card_duel.py --episodes 500 --seed 123
+
+.PHONY: bench-rl-adapter
+bench-rl-adapter:
+	python bridge/benchmarks/benchmark_rl_adapter_loop.py

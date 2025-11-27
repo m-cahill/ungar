@@ -52,11 +52,12 @@ jobs:
           coverage report --fail-under=85
 
       - name: Upload coverage.xml
-        if: always()
+        if: success() && hashFiles('coverage.xml') != ''
         uses: actions/upload-artifact@v4
         with:
           name: coverage-xml
           path: coverage.xml
+          if-no-files-found: warn
 
       - name: Generate SBOM (M03-B)
         run: |
@@ -83,8 +84,20 @@ jobs:
           name: adapter-benchmark
           path: adapter_benchmark.txt
 
-      - name: CI summary
+      - name: RL adapter benchmark (non-gating)
         if: always()
+        run: |
+          python bridge/benchmarks/benchmark_rl_adapter_loop.py | tee rl_adapter_benchmark.txt
+
+      - name: Upload RL benchmark
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rl-adapter-benchmark
+          path: rl_adapter_benchmark.txt
+
+      - name: CI summary
+        if: success() && hashFiles('coverage.xml') != ''
         run: |
           echo "## Quality gates" >> $GITHUB_STEP_SUMMARY
           coverage report >> $GITHUB_STEP_SUMMARY

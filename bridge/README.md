@@ -47,6 +47,23 @@ if __name__ == "__main__":
 
 See `bridge/examples/demo_rediai.py` for a more complete example with workflow recording.
 
+## Local RL Training (No RediAI Required)
+
+The bridge includes a Gymnasium-style RL adapter (`UngarGymEnv`) that supports multi-agent play and can be used for local training loops without RediAI.
+
+A simple bandit-style training script for `HighCardDuel` is provided:
+
+```bash
+make train-high-card
+```
+
+Or manually:
+```bash
+python bridge/examples/train_high_card_duel.py --episodes 1000 --seed 42 --epsilon 0.1
+```
+
+This runs a deterministic training loop using the 4x14xN tensor observations.
+
 ## Optional Dependency
 
 The bridge package is designed to be **safe to import** even without RediAI.
@@ -56,4 +73,5 @@ It checks for `RediAI` at runtime. If missing:
 
 ## Documentation
 
-For detailed architecture and usage, see [docs/bridge_rediai.md](../../docs/bridge_rediai.md).
+*   [RediAI Integration](bridge_rediai.md)
+*   [Local Training & RL Adapter](../../docs/training_high_card.md)
