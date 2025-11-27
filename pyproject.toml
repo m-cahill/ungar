@@ -51,6 +51,12 @@ exclude = ["bridge/examples/"]
 module = "RediAI.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "ungar_bridge.*"
+ignore_missing_imports = true
+follow_imports = "skip"
+disable_error_code = ["import-untyped"]
+
 [tool.pytest.ini_options]
 addopts = "-q --maxfail=1 --disable-warnings --cov=src/ungar --cov-report=xml"
 testpaths = ["tests"]
