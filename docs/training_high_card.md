@@ -56,6 +56,8 @@ The training loop supports generating XAI (Explainable AI) overlays for game sta
 
 This infrastructure allows the training loop to produce "explanations" alongside rewards, which will be used in future milestones for integration with RediAI's interpretability tools.
 
+> **Note:** The XAI pipeline also supports **Mini Spades** (added in M10). See `ungar_bridge/rediai_spades.py` for the implementation.
+
 #### Enabling Overlays
 
 Pass `record_overlays=True` to the training function:

@@ -7,9 +7,10 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any
 
 from .training import TrainingResult
+from .types import WorkflowRecorder
 
 HAS_REDAI_REWARDLAB = True
 
@@ -18,14 +19,6 @@ try:
     from RediAI.rewardlab import RewardDecomposer  # noqa: F401
 except ImportError:
     HAS_REDAI_REWARDLAB = False
-
-
-class WorkflowRecorder(Protocol):
-    """Minimal protocol stub for RediAI recorder (duplicated for type hints)."""
-
-    async def record_artifact(self, name: str, path: str, **kwargs: Any) -> None:
-        """Record a file artifact."""
-        ...
 
 
 def is_rediai_rewardlab_available() -> bool:

@@ -40,18 +40,21 @@ obs, reward, done, info = await env.step(action)
 
 ### Training Workflow
 
-You can run training loops that hook into RediAI's `WorkflowRecorder`. This allows you to log metrics, artifacts, and events to the RediAI registry.
+You can run training loops that hook into RediAI's `WorkflowRecorder`.
 
+**High Card Duel:**
 ```python
 from ungar_bridge.rediai_training import train_high_card_duel_rediai
 
-# Run training (async)
-# Logs metrics to RediAI if installed
-result = await train_high_card_duel_rediai(num_episodes=5000)
-print(f"Final Avg Reward: {sum(result.rewards)/len(result.rewards)}")
+result = await train_high_card_duel_rediai(num_episodes=5000, record_overlays=True)
 ```
 
-Under the hood, this uses RediAI's `workflow_context` to capture metrics. If RediAI is not available, a dummy context is used so your code remains portable.
+**Mini Spades (New in M10):**
+```python
+from ungar_bridge.rediai_spades import train_spades_mini_rediai
+
+result = await train_spades_mini_rediai(num_episodes=200, record_overlays=True)
+```
 
 ### XAI & RewardLab Integration
 
@@ -60,7 +63,7 @@ The training loop also supports advanced artifacts for Explainable AI (XAI) and 
 #### XAI Overlays
 When `record_overlays=True` is passed to the training function:
 1. An XAI overlay (attribution map) is generated for the final episode.
-2. It is serialized to JSON and attached as an artifact named `ungar_high_card_overlays.json`.
+2. It is serialized to JSON and attached as an artifact named `ungar_high_card_overlays.json` or `ungar_spades_overlays.json`.
 3. This artifact can be visualized in RediAI dashboards.
 
 #### Reward Decomposition

@@ -7,25 +7,20 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Protocol, Sequence
+from typing import Sequence
 
 from ungar.xai import CardOverlay, overlay_to_dict
+
+from .types import WorkflowRecorder
 
 HAS_REDAI_XAI = True
 
 try:
     # Adjust import paths based on actual RediAI repo
     # Assuming the same import path as rediai_training.py, or similar
-    from RediAI.registry.recorder import WorkflowRecorder
+    from RediAI.registry.recorder import WorkflowRecorder as _RealRecorder  # noqa: F401
 except ImportError:
     HAS_REDAI_XAI = False
-
-    class WorkflowRecorder(Protocol):  # type: ignore[no-redef]
-        """Minimal protocol stub for RediAI recorder."""
-
-        async def record_artifact(self, name: str, path: str, **kwargs: Any) -> None:
-            """Record a file artifact."""
-            ...
 
 
 def is_rediai_xai_available() -> bool:

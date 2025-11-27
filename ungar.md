@@ -48,6 +48,12 @@ bridge/
 *   **Rules:** Each player gets 1 card. Reveal. High card wins.
 *   **Tensor Planes:** `my_hand`, `opponent_hand`, `unseen`.
 
+### Mini Spades (M10)
+*   **Players:** 2
+*   **Deck:** Standard 52.
+*   **Rules:** 5 cards dealt. Spades is trump. Follow suit if possible. +1 per trick, +5 game winner.
+*   **Tensor Planes:** `my_hand`, `legal_moves`, `current_trick`, `history`.
+
 ## RediAI-Backed Training (Optional)
 
 You can run training loops that optionally integrate with RediAI's workflow registry.
@@ -68,6 +74,8 @@ If RediAI is installed, metrics like average reward are logged to the workflow. 
 *   **M06:** Bridge Quality & Coverage Hardening.
 *   **M07:** Codebase Audit & Refinement.
 *   **M08:** RediAI Training Workflow & XAI Scaffold (Done).
+*   **M09:** Deep RediAI Integration (XAI/RewardLab) & DX Polish (Done).
+*   **M10:** Multi-Game Platform Validation with Mini Spades (Done).
 
 ## Documentation
 

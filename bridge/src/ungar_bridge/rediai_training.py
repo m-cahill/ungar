@@ -7,7 +7,7 @@ RediAI's workflow context for metric logging when available.
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from typing import Any, Protocol
+from typing import Any
 
 from .rediai_rewardlab import (
     build_reward_decomposition_payload,
@@ -16,6 +16,7 @@ from .rediai_rewardlab import (
 )
 from .rediai_xai import is_rediai_xai_available, log_overlays_as_artifact
 from .training import TrainingResult, train_high_card_duel
+from .types import WorkflowRecorder
 
 HAS_REDAI = True
 try:
@@ -23,14 +24,7 @@ try:
 except ImportError:
     HAS_REDAI = False
 
-    class _DummyRecorder(Protocol):
-        async def record_metric(self, name: str, value: float, **kwargs: Any) -> None:
-            ...
-
-        async def record_artifact(self, name: str, path: str, **kwargs: Any) -> None:
-            ...
-
-    async def _dummy_ctx() -> _DummyRecorder:
+    async def _dummy_ctx() -> WorkflowRecorder:
         class _R:
             async def record_metric(self, *a: Any, **kw: Any) -> None:
                 ...
