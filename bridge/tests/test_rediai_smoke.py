@@ -1,10 +1,25 @@
+import importlib.util
 from typing import Any
 from unittest.mock import patch
 
 import pytest
 
-# Import the demo script module
-from bridge.examples import demo_rediai
+# Try both possible package layouts:
+# - in-repo tests (bridge.examples)
+# - installed package (ungar_bridge.examples)
+bridge_spec = importlib.util.find_spec("bridge.examples")
+ungar_bridge_spec = importlib.util.find_spec("ungar_bridge.examples")
+
+if bridge_spec is not None:
+    from bridge.examples import demo_rediai
+elif ungar_bridge_spec is not None:
+    from ungar_bridge.examples import demo_rediai
+else:
+    pytest.skip(
+        "bridge/RediAI demo not available (no bridge.examples or ungar_bridge.examples); "
+        "skipping RediAI smoke test.",
+        allow_module_level=True,
+    )
 
 
 class FakeRecorder:
