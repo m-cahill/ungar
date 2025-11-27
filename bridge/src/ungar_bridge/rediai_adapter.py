@@ -16,7 +16,7 @@ from ungar.game import GameEnv, Move
 HAS_REDAI = True
 
 try:
-    from RediAI.env import EnvAdapter  # type: ignore[import-untyped]
+    from RediAI.env import EnvAdapter  # type: ignore[import-not-found]
 except ImportError:
     HAS_REDAI = False
 
