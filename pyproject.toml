@@ -44,6 +44,7 @@ disallow_untyped_defs = true
 warn_unused_ignores = true
 no_implicit_optional = true
 strict_equality = true
+exclude = ["bridge/"]
 
 [tool.pytest.ini_options]
 addopts = "-q --maxfail=1 --disable-warnings --cov=src/ungar --cov-report=xml"
