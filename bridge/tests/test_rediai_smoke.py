@@ -11,9 +11,9 @@ bridge_spec = importlib.util.find_spec("bridge.examples")
 ungar_bridge_spec = importlib.util.find_spec("ungar_bridge.examples")
 
 if bridge_spec is not None:
-    from bridge.examples import demo_rediai
+    import bridge.examples.demo_rediai as demo_rediai
 elif ungar_bridge_spec is not None:
-    from ungar_bridge.examples import demo_rediai
+    import ungar_bridge.examples.demo_rediai as demo_rediai
 else:
     pytest.skip(
         "bridge/RediAI demo not available (no bridge.examples or ungar_bridge.examples); "
