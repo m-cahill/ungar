@@ -9,9 +9,8 @@ import pytest
 # Try to locate the demo module in either layout:
 #   - In-repo:   bridge.examples.demo_rediai
 #   - Installed: ungar_bridge.examples.demo_rediai
-spec = (
-    importlib.util.find_spec("bridge.examples.demo_rediai")
-    or importlib.util.find_spec("ungar_bridge.examples.demo_rediai")
+spec = importlib.util.find_spec("bridge.examples.demo_rediai") or importlib.util.find_spec(
+    "ungar_bridge.examples.demo_rediai"
 )
 
 if spec is None:
