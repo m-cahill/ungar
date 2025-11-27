@@ -1,7 +1,8 @@
 import time
 from statistics import mean
-from ungar.games.high_card_duel import make_high_card_duel_spec
+
 from ungar.game import GameEnv
+from ungar.games.high_card_duel import make_high_card_duel_spec
 from ungar_bridge.rediai_adapter import RediAIUngarAdapter
 
 N_WARMUP = 100
