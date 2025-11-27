@@ -1,3 +1,5 @@
+import asyncio
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -9,10 +11,10 @@ from bridge.examples import demo_rediai
 class FakeRecorder:
     """Mock RediAI recorder for testing."""
 
-    def __init__(self):
-        self.metrics = []
+    def __init__(self) -> None:
+        self.metrics: list[tuple[str, float, dict[str, Any]]] = []
 
-    async def record_metric(self, name: str, value: float, **kwargs):
+    async def record_metric(self, name: str, value: float, **kwargs: Any) -> None:
         self.metrics.append((name, value, kwargs))
 
 
