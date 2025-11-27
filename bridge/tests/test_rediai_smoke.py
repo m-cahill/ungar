@@ -11,15 +11,17 @@ bridge_spec = importlib.util.find_spec("bridge.examples")
 ungar_bridge_spec = importlib.util.find_spec("ungar_bridge.examples")
 
 if bridge_spec is not None:
-    import bridge.examples.demo_rediai as demo_rediai
+    import bridge.examples as _demo_mod
 elif ungar_bridge_spec is not None:
-    import ungar_bridge.examples.demo_rediai as demo_rediai
+    import ungar_bridge.examples as _demo_mod
 else:
     pytest.skip(
         "bridge/RediAI demo not available (no bridge.examples or ungar_bridge.examples); "
         "skipping RediAI smoke test.",
         allow_module_level=True,
     )
+
+demo_rediai = _demo_mod.demo_rediai
 
 
 class FakeRecorder:
