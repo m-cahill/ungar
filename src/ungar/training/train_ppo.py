@@ -16,6 +16,8 @@ from ungar.agents.adapters.spades_adapter import SpadesAdapter
 from ungar.agents.ppo_lite import PPOLiteAgent
 from ungar.agents.unified_agent import Transition
 from ungar.training.config import PPOConfig
+from ungar.training.device import get_device
+from ungar.training.logger import NoOpLogger, TrainingLogger
 
 
 @dataclass
@@ -40,6 +42,7 @@ def train_ppo(
     game_name: str,
     config: PPOConfig | None = None,
     seed: int = 0,
+    logger: TrainingLogger | None = None,
 ) -> TrainingResult:
     """Train a PPO agent on the specified game."""
     if config is None:
@@ -59,9 +62,16 @@ def train_ppo(
             seed=seed,
         )
 
+    if logger is None:
+        logger = NoOpLogger()
+
     if seed is not None:
         random.seed(seed)
         np.random.seed(seed)
+
+    # Device selection
+    device = get_device(config.device)
+    print(f"Training {game_name} on {device}")
 
     adapter = get_adapter(game_name)
     env = adapter.create_env()
@@ -73,8 +83,9 @@ def train_ppo(
     )
 
     rewards_history = []
+    total_steps = 0
 
-    for _ in range(config.total_episodes):
+    for i in range(config.total_episodes):
         # We don't set seed per episode here to allow variety, assuming global seed set
         # But environment might need reseeding if it's purely deterministic?
         # UNGAR envs use random module, which we seeded globally.
@@ -134,10 +145,17 @@ def train_ppo(
             agent.train_step(transition)
             state = next_state
             steps += 1
+            total_steps += 1
 
         # End of episode update
-        agent.update()
+        update_info = agent.update()
         rewards_history.append(episode_reward)
+
+        # Log metrics
+        metrics = {"episode_reward": episode_reward, "episode_length": float(steps), **update_info}
+        logger.log_metrics(metrics, total_steps)
+
+    logger.close()
 
     return TrainingResult(
         rewards=rewards_history,

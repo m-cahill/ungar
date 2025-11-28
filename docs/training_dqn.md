@@ -23,16 +23,30 @@ The `train_dqn` function accepts a `DQNConfig` object:
 
 ```python
 from ungar.training.config import DQNConfig
+from ungar.training.device import DeviceConfig
 
 config = DQNConfig(
     total_episodes=500,
     learning_rate=1e-3,
     epsilon_decay_episodes=200,
+    device=DeviceConfig(device="auto"),  # Auto-select CUDA/MPS/CPU
 )
 result = train_dqn("gin_rummy", config=config, seed=42)
 ```
 
 If no config is provided, sensible defaults are used (200 episodes, lr=0.0005, buffer=5000).
+
+## Logging
+
+You can pass a logger to capture metrics during training:
+
+```python
+from ungar.training.logger import FileLogger
+
+logger = FileLogger("logs", format="csv")
+train_dqn("high_card_duel", logger=logger)
+# Metrics saved to logs/metrics_<timestamp>.csv
+```
 
 ## How it Works
 
@@ -49,4 +63,3 @@ If no config is provided, sensible defaults are used (200 episodes, lr=0.0005, b
 *   `high_card_duel`
 *   `spades_mini`
 *   `gin_rummy`
-

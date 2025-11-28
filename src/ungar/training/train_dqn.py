@@ -16,6 +16,8 @@ from ungar.agents.adapters.spades_adapter import SpadesAdapter
 from ungar.agents.dqn_lite import DQNLiteAgent
 from ungar.agents.unified_agent import Transition
 from ungar.training.config import DQNConfig
+from ungar.training.device import get_device
+from ungar.training.logger import NoOpLogger, TrainingLogger
 
 
 @dataclass
@@ -39,14 +41,22 @@ def train_dqn(
     game_name: str,
     config: DQNConfig | None = None,
     seed: int | None = None,
+    logger: TrainingLogger | None = None,
 ) -> TrainingResult:
     """Train a DQN agent on the specified game."""
     if config is None:
         config = DQNConfig()
 
+    if logger is None:
+        logger = NoOpLogger()
+
     if seed is not None:
         random.seed(seed)
         np.random.seed(seed)
+
+    # Device selection (TODO: Pass device to agent once supported)
+    device = get_device(config.device)
+    print(f"Training {game_name} on {device}")
 
     adapter = get_adapter(game_name)
     env = adapter.create_env()
@@ -67,6 +77,7 @@ def train_dqn(
     )
 
     rewards_history = []
+    total_steps = 0
 
     for i in range(config.total_episodes):
         ep_seed = seed + i if seed is not None else None
@@ -79,6 +90,7 @@ def train_dqn(
         while not done and steps < config.max_steps_per_episode:
             current_player = state.current_player()
             obs_tensor = state.to_tensor(current_player)
+            # Flatten the entire (4, 14, n) tensor
             obs_flat = obs_tensor.data.flatten().astype(np.float32)
 
             legal_moves = state.legal_moves()
@@ -92,6 +104,7 @@ def train_dqn(
 
             next_state, rewards, done, _ = env.step(move)
 
+            # Get reward for player who acted
             step_reward = 0.0
             if done:
                 step_reward = rewards[current_player]
@@ -121,8 +134,21 @@ def train_dqn(
 
             state = next_state
             steps += 1
+            total_steps += 1
 
         rewards_history.append(episode_reward)
+
+        # Log episode metrics
+        logger.log_metrics(
+            {
+                "episode_reward": episode_reward,
+                "epsilon": agent.epsilon,
+                "episode_length": float(steps),
+            },
+            total_steps,
+        )
+
+    logger.close()
 
     return TrainingResult(
         rewards=rewards_history,

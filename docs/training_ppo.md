@@ -38,6 +38,23 @@ The `PPOConfig` dataclass supports:
 *   `update_epochs`: Epochs over the buffer per update (default 4).
 *   `minibatch_size`: SGD minibatch size (default 16).
 *   `gae_lambda`: GAE lambda for advantage estimation (default 0.95).
+*   `device`: `DeviceConfig` for GPU selection (default "auto").
+
+## Logging
+
+Metrics (episode reward, length, loss) can be logged to CSV or TensorBoard:
+
+```python
+from ungar.training.logger import FileLogger, TensorBoardLogger
+
+# CSV logging
+logger = FileLogger("logs")
+train_ppo("spades_mini", logger=logger)
+
+# TensorBoard logging
+logger = TensorBoardLogger("runs/spades_experiment")
+train_ppo("spades_mini", logger=logger)
+```
 
 ## How it Works
 
@@ -61,4 +78,3 @@ The `PPOConfig` dataclass supports:
 *   **DQN:** Off-policy, value-based. Faster for simple games with discrete actions.
 
 For High Card Duel, both work. For Gin Rummy (complex state), PPO may learn faster.
-

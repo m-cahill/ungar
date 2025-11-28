@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+from .device import DeviceConfig
 
 
 @dataclass
@@ -16,6 +18,8 @@ class AlgorithmConfig:
     total_episodes: int
     max_steps_per_episode: int
     seed: int | None = None
+
+    device: DeviceConfig = field(default_factory=DeviceConfig)
 
 
 @dataclass
