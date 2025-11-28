@@ -1,6 +1,6 @@
-"""DQN Training Runner.
+"""PPO Training Runner.
 
-Unified training loop for any supported game using DQNLiteAgent.
+Unified training loop for PPO agents.
 """
 
 from __future__ import annotations
@@ -13,9 +13,9 @@ import numpy as np
 from ungar.agents.adapters.gin_adapter import GinAdapter
 from ungar.agents.adapters.high_card_adapter import HighCardAdapter
 from ungar.agents.adapters.spades_adapter import SpadesAdapter
-from ungar.agents.dqn_lite import DQNLiteAgent
+from ungar.agents.ppo_lite import PPOLiteAgent
 from ungar.agents.unified_agent import Transition
-from ungar.training.config import DQNConfig
+from ungar.training.config import PPOConfig
 
 
 @dataclass
@@ -25,6 +25,7 @@ class TrainingResult:
 
 
 def get_adapter(game_name: str) -> HighCardAdapter | SpadesAdapter | GinAdapter:
+    # Duplicated logic from train_dqn, consider moving to common utility if grows
     if game_name == "high_card_duel":
         return HighCardAdapter()
     elif game_name == "spades_mini":
@@ -35,14 +36,28 @@ def get_adapter(game_name: str) -> HighCardAdapter | SpadesAdapter | GinAdapter:
         raise ValueError(f"Unknown game: {game_name}")
 
 
-def train_dqn(
+def train_ppo(
     game_name: str,
-    config: DQNConfig | None = None,
-    seed: int | None = None,
+    config: PPOConfig | None = None,
+    seed: int = 0,
 ) -> TrainingResult:
-    """Train a DQN agent on the specified game."""
+    """Train a PPO agent on the specified game."""
     if config is None:
-        config = DQNConfig()
+        config = PPOConfig(
+            algorithm="ppo",
+            learning_rate=3e-4,
+            gamma=0.99,
+            batch_size=64,
+            total_episodes=50,
+            max_steps_per_episode=1000,
+            clip_coef=0.2,
+            value_coef=0.5,
+            entropy_coef=0.01,
+            update_epochs=3,
+            minibatch_size=16,
+            gae_lambda=0.95,
+            seed=seed,
+        )
 
     if seed is not None:
         random.seed(seed)
@@ -51,26 +66,19 @@ def train_dqn(
     adapter = get_adapter(game_name)
     env = adapter.create_env()
 
-    # Initialize Agent
-    agent = DQNLiteAgent(
+    agent = PPOLiteAgent(
         input_dim=adapter.tensor_shape,
         action_space_size=adapter.action_space_size,
-        lr=config.learning_rate,
-        gamma=config.gamma,
-        epsilon_start=config.epsilon_start,
-        epsilon_end=config.epsilon_end,
-        epsilon_decay=config.epsilon_decay_episodes,
-        buffer_size=config.replay_capacity,
-        batch_size=config.batch_size,
-        target_update_tau=config.target_update_tau,
-        seed=seed,
+        config=config,
     )
 
     rewards_history = []
 
-    for i in range(config.total_episodes):
-        ep_seed = seed + i if seed is not None else None
-        state = env.reset(seed=ep_seed)
+    for _ in range(config.total_episodes):
+        # We don't set seed per episode here to allow variety, assuming global seed set
+        # But environment might need reseeding if it's purely deterministic?
+        # UNGAR envs use random module, which we seeded globally.
+        state = env.reset()
 
         episode_reward = 0.0
         steps = 0
@@ -97,16 +105,22 @@ def train_dqn(
                 step_reward = rewards[current_player]
                 episode_reward = step_reward
 
-            next_player = next_state.current_player() if not done else 0
+            # For PPO, we store transition now.
+            # next_obs is needed only for value bootstrap if not done?
+            # Our PPO Lite doesn't use next_obs for act/value in update loop except boundary.
+            # We can pass zeros or real next obs.
 
             next_obs_flat = np.zeros_like(obs_flat)
-            legal_next_indices: List[int] = []
-
             if not done:
+                # Next player might be different, but we track "our" trajectory?
+                # PPO assumes single agent perspective.
+                # In self-play, next state IS the next observation for the agent (if it's their turn).
+                # But in alternating turns, next state is opponent turn.
+                # For this Lite implementation, we just store the sequence of states seen by ANY player.
+                # Since we share the network, this is shared self-play training.
+                next_player = next_state.current_player()
                 next_tensor = next_state.to_tensor(next_player)
                 next_obs_flat = next_tensor.data.flatten().astype(np.float32)
-                legal_next = next_state.legal_moves()
-                legal_next_indices = adapter.moves_to_indices(list(legal_next))
 
             transition = Transition(
                 obs=obs_flat,
@@ -114,14 +128,15 @@ def train_dqn(
                 reward=step_reward,
                 next_obs=next_obs_flat,
                 done=done,
-                legal_moves_next=legal_next_indices,
+                legal_moves_next=[],  # PPO Lite doesn't strictly use this for masking next Q
             )
 
             agent.train_step(transition)
-
             state = next_state
             steps += 1
 
+        # End of episode update
+        agent.update()
         rewards_history.append(episode_reward)
 
     return TrainingResult(

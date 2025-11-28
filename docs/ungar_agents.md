@@ -26,6 +26,9 @@ A baseline that selects legal moves uniformly at random. Useful for testing envi
 ### DQNLiteAgent
 A lightweight DQN implementation suitable for learning card game strategies. It handles the flattened `4x14xn` card tensor directly.
 
+### PPOLiteAgent (M13)
+An on-policy Actor-Critic agent using Proximal Policy Optimization. Uses GAE for advantage estimation and supports legal move masking. Better suited for games with complex action spaces.
+
 ## Usage
 
 Agents are typically instantiated via the training runner, but can be used standalone:

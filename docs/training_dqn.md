@@ -19,12 +19,20 @@ result = train_dqn("gin_rummy", episodes=500)
 
 ## Configuration
 
-The `train_dqn` function supports basic hyperparameters:
+The `train_dqn` function accepts a `DQNConfig` object:
 
-*   `episodes`: Number of games to play.
-*   `lr`: Learning rate (default 0.0005).
-*   `buffer_size`: Replay buffer capacity (default 5000).
-*   `seed`: Random seed for reproducibility.
+```python
+from ungar.training.config import DQNConfig
+
+config = DQNConfig(
+    total_episodes=500,
+    learning_rate=1e-3,
+    epsilon_decay_episodes=200,
+)
+result = train_dqn("gin_rummy", config=config, seed=42)
+```
+
+If no config is provided, sensible defaults are used (200 episodes, lr=0.0005, buffer=5000).
 
 ## How it Works
 
