@@ -88,6 +88,13 @@ M09 adds deep integration with RediAI's XAI and RewardLab ecosystems.
 *   **Reward Decomposition:** Rewards are broken down into components (win/loss, baseline) and logged for RewardLab analysis.
 *   See [docs/bridge_rediai.md](docs/bridge_rediai.md) for details.
 
+## Agents & RL (M12)
+
+M12 introduces a unified agent system and the first real RL algorithm: **DQN-Lite**.
+*   **UnifiedAgent:** Protocol for swappable agents.
+*   **DQN-Lite:** Lightweight, PyTorch-based Deep Q-Network that learns on raw card tensors.
+*   See [docs/ungar_agents.md](docs/ungar_agents.md) and [docs/training_dqn.md](docs/training_dqn.md).
+
 ## Mini Spades (M10)
 
 M10 introduces a second game environment: **Mini Spades**. This trick-taking game validates the platform's generality and cross-game XAI capabilities.

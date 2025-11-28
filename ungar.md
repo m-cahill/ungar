@@ -83,8 +83,11 @@ If RediAI is installed, metrics like average reward are logged to the workflow. 
 *   **M09:** Deep RediAI Integration (XAI/RewardLab) & DX Polish (Done).
 *   **M10:** Multi-Game Platform Validation with Mini Spades (Done).
 *   **M11:** Gin Rummy & Advanced State Encoding (Done).
+*   **M12:** Unified Agents & DQN-Lite (Done).
 
 ## Documentation
 
 *   [bridge/README.md](bridge/README.md): Bridge package usage.
 *   [docs/bridge_rediai.md](docs/bridge_rediai.md): Detailed RediAI integration docs.
+*   [docs/ungar_agents.md](docs/ungar_agents.md): Unified Agent system (DQN/Random).
+*   [docs/training_dqn.md](docs/training_dqn.md): Training guide for DQN.
