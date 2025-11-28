@@ -56,6 +56,13 @@ from ungar_bridge.rediai_spades import train_spades_mini_rediai
 result = await train_spades_mini_rediai(num_episodes=200, record_overlays=True)
 ```
 
+**Gin Rummy (New in M11):**
+```python
+from ungar_bridge.rediai_gin import train_gin_rummy_rediai
+
+result = await train_gin_rummy_rediai(num_episodes=500, record_overlays=True)
+```
+
 ### XAI & RewardLab Integration
 
 The training loop also supports advanced artifacts for Explainable AI (XAI) and Reward Decomposition.
@@ -63,7 +70,7 @@ The training loop also supports advanced artifacts for Explainable AI (XAI) and 
 #### XAI Overlays
 When `record_overlays=True` is passed to the training function:
 1. An XAI overlay (attribution map) is generated for the final episode.
-2. It is serialized to JSON and attached as an artifact named `ungar_high_card_overlays.json` or `ungar_spades_overlays.json`.
+2. It is serialized to JSON and attached as an artifact named `ungar_high_card_overlays.json`, `ungar_spades_overlays.json`, or `ungar_gin_overlays.json`.
 3. This artifact can be visualized in RediAI dashboards.
 
 #### Reward Decomposition

@@ -54,6 +54,12 @@ bridge/
 *   **Rules:** 5 cards dealt. Spades is trump. Follow suit if possible. +1 per trick, +5 game winner.
 *   **Tensor Planes:** `my_hand`, `legal_moves`, `current_trick`, `history`.
 
+### Gin Rummy (M11)
+*   **Players:** 2
+*   **Deck:** Standard 52.
+*   **Rules:** 10 cards dealt. Draw/Discard cycle. Knock/Gin logic.
+*   **Tensor Planes:** `my_hand`, `in_discard`, `top_discard`, `legal_draw_discard`, `legal_discard`, `legal_knock`.
+
 ## RediAI-Backed Training (Optional)
 
 You can run training loops that optionally integrate with RediAI's workflow registry.
@@ -76,6 +82,7 @@ If RediAI is installed, metrics like average reward are logged to the workflow. 
 *   **M08:** RediAI Training Workflow & XAI Scaffold (Done).
 *   **M09:** Deep RediAI Integration (XAI/RewardLab) & DX Polish (Done).
 *   **M10:** Multi-Game Platform Validation with Mini Spades (Done).
+*   **M11:** Gin Rummy & Advanced State Encoding (Done).
 
 ## Documentation
 

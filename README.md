@@ -92,6 +92,10 @@ M09 adds deep integration with RediAI's XAI and RewardLab ecosystems.
 
 M10 introduces a second game environment: **Mini Spades**. This trick-taking game validates the platform's generality and cross-game XAI capabilities.
 
+## Gin Rummy (M11)
+
+M11 adds **Gin Rummy**, a complex imperfect-information game with draw/discard mechanics, sets/runs meld logic, and knocking. It fully exercises the tensor substrate's ability to represent multi-zone states.
+
 ## Roadmap
 
 * **M00** – Repo & CI Bootstrap (Done).
