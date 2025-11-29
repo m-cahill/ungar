@@ -6,8 +6,9 @@ Unified training loop for any supported game using DQNLiteAgent.
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass
-from typing import Dict, List
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Dict, List, Optional
 
 import numpy as np
 from ungar.agents.adapters.gin_adapter import GinAdapter
@@ -17,13 +18,16 @@ from ungar.agents.dqn_lite import DQNLiteAgent
 from ungar.agents.unified_agent import Transition
 from ungar.training.config import DQNConfig
 from ungar.training.device import get_device
-from ungar.training.logger import NoOpLogger, TrainingLogger
+from ungar.training.logger import FileLogger, NoOpLogger, TrainingLogger
+from ungar.training.overlay_exporter import OverlayExporter
+from ungar.training.run_dir import create_run_dir
 
 
 @dataclass
 class TrainingResult:
     rewards: List[float]
     metrics: Dict[str, float]
+    run_dir: Optional[Path] = None
 
 
 def get_adapter(game_name: str) -> HighCardAdapter | SpadesAdapter | GinAdapter:
@@ -42,10 +46,51 @@ def train_dqn(
     config: DQNConfig | None = None,
     seed: int | None = None,
     logger: TrainingLogger | None = None,
+    run_dir: str | Path | None = None,
+    run_id: str | None = None,
 ) -> TrainingResult:
     """Train a DQN agent on the specified game."""
     if config is None:
         config = DQNConfig()
+
+    # Device selection
+    device_obj = get_device(config.device)
+    device_str = str(device_obj)
+    print(f"Training {game_name} on {device_str}")
+
+    # Setup run directory if requested or if logger is missing but run_dir implies logging
+    exporter: OverlayExporter | None = None
+
+    if run_dir is not None or (logger is None and run_dir is None):
+        # If no logger provided, we might default to FileLogger in a temp dir?
+        # Or if run_dir is provided, we MUST use FileLogger there.
+        pass
+
+    # If run_dir is explicitly requested, set up structured logging
+    actual_run_dir: Path | None = None
+
+    if run_dir:
+        paths = create_run_dir(
+            game=game_name,
+            algo="dqn",
+            config_dict=asdict(config),
+            device=device_str,
+            base_dir=run_dir,
+            run_id=run_id,
+        )
+        actual_run_dir = paths.root
+
+        if logger is None:
+            # Use FileLogger in the structured dir
+            # FileLogger takes a directory and creates metrics_<timestamp>.csv
+            # But create_run_dir defines metrics.csv.
+            # We might need to adjust FileLogger or just let it create its own file in that dir.
+            # Ideally FileLogger should support a fixed filename.
+            # For now, let's point FileLogger to the root and let it name the file.
+            logger = FileLogger(paths.root, format="csv", filename="metrics.csv")
+
+        # Setup overlay exporter
+        exporter = OverlayExporter(paths.overlays)
 
     if logger is None:
         logger = NoOpLogger()
@@ -53,10 +98,6 @@ def train_dqn(
     if seed is not None:
         random.seed(seed)
         np.random.seed(seed)
-
-    # Device selection (TODO: Pass device to agent once supported)
-    device = get_device(config.device)
-    print(f"Training {game_name} on {device}")
 
     adapter = get_adapter(game_name)
     env = adapter.create_env()
@@ -148,6 +189,12 @@ def train_dqn(
             total_steps,
         )
 
+    if exporter:
+        # Just save for now, we didn't collect any overlays in this loop yet
+        # To support overlays, we'd need to integrate OverlayGenerator
+        # For M15 we just need the infrastructure.
+        pass
+
     logger.close()
 
     return TrainingResult(
@@ -155,4 +202,5 @@ def train_dqn(
         metrics={
             "avg_reward": sum(rewards_history) / len(rewards_history) if rewards_history else 0.0
         },
+        run_dir=actual_run_dir,
     )

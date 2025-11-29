@@ -45,13 +45,19 @@ class NoOpLogger:
 class FileLogger:
     """Logs metrics to a CSV or JSONL file."""
 
-    def __init__(self, log_dir: str | Path, format: str = "csv") -> None:
+    def __init__(
+        self, log_dir: str | Path, format: str = "csv", filename: str | None = None
+    ) -> None:
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
         self.format = format
 
-        timestamp = int(time.time())
-        self.log_file = self.log_dir / f"metrics_{timestamp}.{format}"
+        if filename:
+            self.log_file = self.log_dir / filename
+        else:
+            timestamp = int(time.time())
+            self.log_file = self.log_dir / f"metrics_{timestamp}.{format}"
+
         self.file = open(self.log_file, "w", newline="", encoding="utf-8")
         self.writer: Any = None
 

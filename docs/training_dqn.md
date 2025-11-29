@@ -63,3 +63,7 @@ train_dqn("high_card_duel", logger=logger)
 *   `high_card_duel`
 *   `spades_mini`
 *   `gin_rummy`
+
+## Analysis
+
+See [docs/analytics_overview.md](analytics_overview.md) for how to visualize training logs and XAI overlays.

@@ -78,3 +78,7 @@ train_ppo("spades_mini", logger=logger)
 *   **DQN:** Off-policy, value-based. Faster for simple games with discrete actions.
 
 For High Card Duel, both work. For Gin Rummy (complex state), PPO may learn faster.
+
+## Analysis
+
+See [docs/analytics_overview.md](analytics_overview.md) for how to visualize training logs and XAI overlays.

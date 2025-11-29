@@ -113,7 +113,8 @@ class HighCardDuelSpec(GameSpec):
 
     def initial_state(self, seed: int | None = None) -> GameState:
         rng = Random(seed)  # nosec B311: pseudo-random is sufficient for game simulation
-        deck = list(all_cards())
+        # Standard 52 cards only (exclude Jokers)
+        deck = [c for c in all_cards() if c.rank is not Rank.JOKER]
         rng.shuffle(deck)
         hands = (deck[0], deck[1])
         return HighCardDuelState(

@@ -6,8 +6,9 @@ Unified training loop for PPO agents.
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass
-from typing import Dict, List
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Dict, List, Optional
 
 import numpy as np
 from ungar.agents.adapters.gin_adapter import GinAdapter
@@ -17,13 +18,16 @@ from ungar.agents.ppo_lite import PPOLiteAgent
 from ungar.agents.unified_agent import Transition
 from ungar.training.config import PPOConfig
 from ungar.training.device import get_device
-from ungar.training.logger import NoOpLogger, TrainingLogger
+from ungar.training.logger import FileLogger, NoOpLogger, TrainingLogger
+from ungar.training.overlay_exporter import OverlayExporter
+from ungar.training.run_dir import create_run_dir
 
 
 @dataclass
 class TrainingResult:
     rewards: List[float]
     metrics: Dict[str, float]
+    run_dir: Optional[Path] = None
 
 
 def get_adapter(game_name: str) -> HighCardAdapter | SpadesAdapter | GinAdapter:
@@ -43,6 +47,8 @@ def train_ppo(
     config: PPOConfig | None = None,
     seed: int = 0,
     logger: TrainingLogger | None = None,
+    run_dir: str | Path | None = None,
+    run_id: str | None = None,
 ) -> TrainingResult:
     """Train a PPO agent on the specified game."""
     if config is None:
@@ -62,16 +68,34 @@ def train_ppo(
             seed=seed,
         )
 
+    # Device selection
+    device_obj = get_device(config.device)
+    device_str = str(device_obj)
+    print(f"Training {game_name} on {device_str}")
+
+    # Setup run directory if requested
+    exporter: OverlayExporter | None = None
+
+    if run_dir:
+        paths = create_run_dir(
+            game=game_name,
+            algo="ppo",
+            config_dict=asdict(config),
+            device=device_str,
+            base_dir=run_dir,
+            run_id=run_id,
+        )
+        if logger is None:
+            logger = FileLogger(paths.root, format="csv", filename="metrics.csv")
+
+        exporter = OverlayExporter(paths.overlays)
+
     if logger is None:
         logger = NoOpLogger()
 
     if seed is not None:
         random.seed(seed)
         np.random.seed(seed)
-
-    # Device selection
-    device = get_device(config.device)
-    print(f"Training {game_name} on {device}")
 
     adapter = get_adapter(game_name)
     env = adapter.create_env()
@@ -117,18 +141,9 @@ def train_ppo(
                 episode_reward = step_reward
 
             # For PPO, we store transition now.
-            # next_obs is needed only for value bootstrap if not done?
-            # Our PPO Lite doesn't use next_obs for act/value in update loop except boundary.
-            # We can pass zeros or real next obs.
 
             next_obs_flat = np.zeros_like(obs_flat)
             if not done:
-                # Next player might be different, but we track "our" trajectory?
-                # PPO assumes single agent perspective.
-                # In self-play, next state IS the next observation for the agent (if it's their turn).
-                # But in alternating turns, next state is opponent turn.
-                # For this Lite implementation, we just store the sequence of states seen by ANY player.
-                # Since we share the network, this is shared self-play training.
                 next_player = next_state.current_player()
                 next_tensor = next_state.to_tensor(next_player)
                 next_obs_flat = next_tensor.data.flatten().astype(np.float32)
@@ -155,6 +170,10 @@ def train_ppo(
         metrics = {"episode_reward": episode_reward, "episode_length": float(steps), **update_info}
         logger.log_metrics(metrics, total_steps)
 
+    if exporter:
+        # Just save for now, we didn't collect any overlays in this loop yet
+        pass
+
     logger.close()
 
     return TrainingResult(
@@ -162,4 +181,5 @@ def train_ppo(
         metrics={
             "avg_reward": sum(rewards_history) / len(rewards_history) if rewards_history else 0.0
         },
+        run_dir=Path(run_dir) if run_dir else None,
     )

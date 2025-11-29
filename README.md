@@ -92,8 +92,9 @@ M09 adds deep integration with RediAI's XAI and RewardLab ecosystems.
 
 M12 introduces a unified agent system and the first real RL algorithm: **DQN-Lite**.
 *   **UnifiedAgent:** Protocol for swappable agents.
-*   **DQN-Lite:** Lightweight, PyTorch-based Deep Q-Network that learns on raw card tensors.
-*   See [docs/ungar_agents.md](docs/ungar_agents.md) and [docs/training_dqn.md](docs/training_dqn.md).
+*   **DQN-Lite & PPO-Lite:** Lightweight, PyTorch-based agents that learn on raw card tensors.
+*   See [docs/ungar_agents.md](docs/ungar_agents.md), [docs/training_dqn.md](docs/training_dqn.md), and [docs/training_ppo.md](docs/training_ppo.md).
+*   See [docs/analytics_overview.md](docs/analytics_overview.md) for M15 analysis tools.
 
 ## Mini Spades (M10)
 
