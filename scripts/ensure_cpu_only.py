@@ -1,14 +1,17 @@
-import sys
+"""Ensure that the installed torch build is CPU-only in CI."""
+
+from __future__ import annotations
+
 import torch
 
-def main():
+
+def main() -> None:
+    """Exit non-zero if CUDA is available."""
     if torch.cuda.is_available():
-        print("ERROR: CUDA is available but we expected CPU-only torch.")
-        print(f"Torch version: {torch.__version__}")
-        sys.exit(1)
-    
+        raise SystemExit("CUDA is available; expected CPU-only torch build in CI.")
+
     print(f"SUCCESS: Torch {torch.__version__} is CPU-only as expected.")
+
 
 if __name__ == "__main__":
     main()
-
