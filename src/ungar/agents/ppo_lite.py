@@ -63,9 +63,12 @@ class ActorCritic(nn.Module):
 
         probs = Categorical(logits=logits)
         if action is None:
-            action = probs.sample()
+            action_tensor = probs.sample()
+        else:
+            # Normalize any incoming type to a proper LongTensor on the same device
+            action_tensor = torch.as_tensor(action, dtype=torch.long, device=logits.device)
 
-        return action, probs.log_prob(action), probs.entropy(), self.critic(features)
+        return action_tensor, probs.log_prob(action_tensor), probs.entropy(), self.critic(features)
 
 
 class PPOLiteAgent:
