@@ -30,25 +30,26 @@ def test_file_logger_csv(tmp_path: Path) -> None:
 
 def test_overlay_exporter(tmp_path: Path) -> None:
     """Test overlay export to JSON."""
-    exporter = OverlayExporter(export_dir=tmp_path)
+    # M19 updated OverlayExporter signature
+    from ungar.xai_methods import RandomOverlayMethod
+    import numpy as np
+    
+    exporter = OverlayExporter(
+        out_dir=tmp_path,
+        methods=[RandomOverlayMethod()],
+        max_overlays=10
+    )
 
-    overlay1 = zero_overlay("test1")
-    overlay2 = zero_overlay("test2")
+    # export() computes and saves directly
+    obs = np.zeros(56) # 4x14 flattened
+    exporter.export(obs=obs, action=0, step=1, run_id="test_run")
+    exporter.export(obs=obs, action=0, step=2, run_id="test_run")
 
-    exporter.add(overlay1)
-    exporter.add(overlay2)
-
-    output_path = exporter.save("test_overlays.json")
-
-    assert output_path.exists()
-
-    with open(output_path, "r", encoding="utf-8") as f:
+    files = list(tmp_path.glob("*.json"))
+    assert len(files) == 2
+    
+    # Check content of one
+    with open(files[0], "r", encoding="utf-8") as f:
         data = json.load(f)
-
-    assert isinstance(data, list)
-    assert len(data) == 2
-    assert data[0]["label"] == "test1"
-    assert data[1]["label"] == "test2"
-
-    exporter.clear()
-    assert len(exporter.overlays) == 0
+        assert data["label"] == "random"
+        assert data["run_id"] == "test_run"

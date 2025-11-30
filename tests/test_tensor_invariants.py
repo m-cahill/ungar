@@ -4,6 +4,7 @@ from ungar.enums import Rank, Suit
 from ungar.tensor import CardTensor
 
 
+@pytest.mark.smoke
 def test_validate_exclusive_planes_ok() -> None:
     p1_hand = {Card(Suit.SPADES, Rank.ACE)}
     p2_hand = {Card(Suit.HEARTS, Rank.ACE)}

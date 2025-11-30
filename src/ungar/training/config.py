@@ -23,6 +23,16 @@ class AlgorithmConfig:
 
 
 @dataclass
+class XAIConfig:
+    """Configuration for Explainable AI (XAI) overlays."""
+
+    enabled: bool = False
+    methods: list[str] = field(default_factory=lambda: ["heuristic"])
+    every_n_episodes: int = 10
+    max_overlays_per_run: int = 200
+
+
+@dataclass
 class DQNConfig(AlgorithmConfig):
     """Configuration for DQN algorithm."""
 
@@ -38,6 +48,8 @@ class DQNConfig(AlgorithmConfig):
     epsilon_start: float = 1.0
     epsilon_end: float = 0.1
     epsilon_decay_episodes: int = 100
+
+    xai: XAIConfig = field(default_factory=XAIConfig)
 
 
 @dataclass
@@ -59,3 +71,5 @@ class PPOConfig(AlgorithmConfig):
     )
     minibatch_size: int = 16  # For SGD updates within PPO epoch
     gae_lambda: float = 0.95
+
+    xai: XAIConfig = field(default_factory=XAIConfig)

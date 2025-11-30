@@ -24,6 +24,8 @@ def mock_runs_dir(tmp_path: Path) -> Generator[Path, None, None]:
     manifest = RunManifest(
         run_id=run_id,
         timestamp=123456.0,
+        created_at="2025-01-01T00:00:00Z",
+        analytics_schema_version=1,
         game="test_game",
         algo="dqn",
         config={"lr": 0.01},
@@ -86,10 +88,12 @@ def test_train_smoke(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
 
 def test_plot_curves_smoke(tmp_path: Path) -> None:
     """Test plotting CLI (smoke test)."""
-    # Mock matplotlib to avoid dependency check failure in CI environments without it
-    # But our CLI imports it inside the function.
-    # We'll mock plot_learning_curve
-    with patch("ungar.cli.plot_learning_curve") as mock_plot:
+    # Because we moved imports inside the function, we must patch where they are IMPORTED from,
+    # or patch sys.modules before the function runs if we want to mock the module itself.
+    # But cmd_plot_curves does: from ungar.analysis.plots import plot_learning_curve
+    # So we should patch ungar.analysis.plots.plot_learning_curve
+    
+    with patch("ungar.analysis.plots.plot_learning_curve") as mock_plot:
         # Mock matplotlib import check inside CLI
         with patch.dict(sys.modules, {"matplotlib": MagicMock()}):
             run_cli(["plot-curves", "--run", "some/path", "--out", str(tmp_path / "curve.png")])
@@ -98,9 +102,16 @@ def test_plot_curves_smoke(tmp_path: Path) -> None:
 
 def test_summarize_overlays_smoke(tmp_path: Path) -> None:
     """Test overlay summary CLI (smoke test)."""
-    with patch("ungar.cli.load_overlays", return_value=[MagicMock()]), patch(
-        "ungar.cli.aggregate_overlays", return_value=MagicMock()
-    ), patch("ungar.cli.save_aggregation"), patch("ungar.cli.plot_overlay_heatmap"), patch.dict(
+    # Similarly, imports are local now.
+    # We need a real-ish overlay for load_overlays return value, because compute_mean_overlay checks shape.
+    from ungar.xai import zero_overlay
+    
+    real_overlay = zero_overlay("test")
+    
+    with patch("ungar.analysis.overlays.load_overlays", return_value=[real_overlay]), patch(
+        "ungar.analysis.overlays.save_aggregation"), patch(
+        "ungar.analysis.plots.plot_overlay_heatmap"
+    ), patch.dict(
         sys.modules, {"matplotlib": MagicMock()}
     ):
         run_cli(["summarize-overlays", "--run", "some/path", "--out-dir", str(tmp_path)])

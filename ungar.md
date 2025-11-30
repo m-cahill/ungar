@@ -84,6 +84,15 @@ If RediAI is installed, metrics like average reward are logged to the workflow. 
 *   **M10:** Multi-Game Platform Validation with Mini Spades (Done).
 *   **M11:** Gin Rummy & Advanced State Encoding (Done).
 *   **M12:** Unified Agents & DQN-Lite (Done).
+*   **M17:** Analytics Contracts & Frontend v1 Freeze (Done).
+
+## Frontend Status & Integration
+
+The UNGAR frontend is currently **frozen** at v1 (mock-only).
+
+*   **Status Doc:** [docs/frontend_status.md](docs/frontend_status.md)
+*   **Integration Contract:** [docs/analytics_schema.md](docs/analytics_schema.md)
+*   Future integration is **out-of-scope** until explicitly re-opened. Frontends must consume artifacts via `ungar export-run`.
 
 ## Documentation
 
@@ -91,3 +100,4 @@ If RediAI is installed, metrics like average reward are logged to the workflow. 
 *   [docs/bridge_rediai.md](docs/bridge_rediai.md): Detailed RediAI integration docs.
 *   [docs/ungar_agents.md](docs/ungar_agents.md): Unified Agent system (DQN/Random).
 *   [docs/training_dqn.md](docs/training_dqn.md): Training guide for DQN.
+*   [docs/analytics_schema.md](docs/analytics_schema.md): Analytics artifact schema.

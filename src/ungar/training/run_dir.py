@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import datetime
 import json
 import time
 import uuid
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+ANALYTICS_SCHEMA_VERSION = 1
 
 
 @dataclass
@@ -16,6 +19,8 @@ class RunManifest:
 
     run_id: str
     timestamp: float
+    created_at: str
+    analytics_schema_version: int
     game: str
     algo: str
     config: Dict[str, Any]
@@ -66,6 +71,8 @@ def create_run_dir(
         run_id = str(uuid.uuid4())[:8]
 
     timestamp = time.time()
+    created_at = datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc).isoformat()
+
     # Format: <timestamp_int>_<game>_<algo>_<short_id>
     dirname = f"{int(timestamp)}_{game}_{algo}_{run_id}"
     run_root = base_dir / dirname
@@ -86,6 +93,8 @@ def create_run_dir(
     manifest = RunManifest(
         run_id=run_id,
         timestamp=timestamp,
+        created_at=created_at,
+        analytics_schema_version=ANALYTICS_SCHEMA_VERSION,
         game=game,
         algo=algo,
         config=config_dict,

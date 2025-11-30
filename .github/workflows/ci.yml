@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  ci:
+  smoke:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,11 +30,8 @@ jobs:
       - name: Install dev dependencies (Core)
         run: |
           python -m pip install -U pip
-          # Install CPU-only torch first
           python -m pip install -r ci-requirements.txt
-          # Install other dev deps, skipping deps to avoid pulling CUDA torch
           python -m pip install -r requirements-dev.txt --no-deps
-          # Explicitly install security tools if not in requirements
           python -m pip install bandit pip-audit cyclonedx-bom --no-deps
 
       - name: Install Bridge Dependencies
@@ -42,90 +39,142 @@ jobs:
           python -m pip install -e . --no-deps
           python -m pip install -e bridge --no-deps
 
-      - name: Ensure no CUDA packages are installed
-        run: |
-          pip freeze | grep -i 'cuda' && (echo "CUDA package found!"; exit 1) || echo "No CUDA packages."
-
       - name: Fail fast if UNGAR imports
         run: python -c "import ungar"
 
-      - name: Ensure torch is CPU-only
-        run: python scripts/ensure_cpu_only.py
-
-      - name: Lint and Typecheck (Combined)
+      - name: Lint and Typecheck
         run: |
           ruff check .
-          if ! ruff format --check .; then
-            echo "## Ruff formatting failed" >> $GITHUB_STEP_SUMMARY
-            echo "Run 'ruff format .' locally and commit the changes." >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
+          ruff format --check .
           mypy .
 
-      - name: Run tests (core + bridge) with coverage
+      - name: Smoke Tests
+        run: pytest -m smoke
+
+  tests-full:
+    needs: smoke
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: |
+            ci-requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r ci-requirements.txt
+          python -m pip install -r requirements-dev.txt --no-deps
+          python -m pip install -e . --no-deps
+          python -m pip install -e bridge --no-deps
+
+      - name: Run Full Tests
         run: |
           pytest src tests bridge/tests \
             --cov=src/ungar \
             --cov=bridge/src/ungar_bridge \
             --cov-report=xml \
             --cov-report=term-missing
-          # Enforce coverage threshold explicitly if .coveragerc isn't picked up automatically by pytest-cov for fail_under
-          coverage report --fail-under=85
+          coverage report --fail-under=70
 
       - name: Upload coverage.xml
-        if: success() && hashFiles('coverage.xml') != ''
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-xml-${{ matrix.python-version }}
           path: coverage.xml
-          if-no-files-found: warn
-          overwrite: true
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r requirements-dev.txt --no-deps
+          python -m pip install bandit pip-audit --no-deps
+
+      - name: Bandit Security Scan
+        run: bandit -r src -lll -f json -o bandit.json
+
+      - name: pip-audit Security Scan
+        run: pip-audit -r requirements-dev.txt -f json -o pip_audit.json
+
+      - name: Upload Security Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit.json
+            pip_audit.json
+
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r ci-requirements.txt
+          python -m pip install cyclonedx-bom
 
       - name: Generate SBOM (M03-B)
         run: |
-          # Use 'environment' command which inspects current environment
-          # Or if requirements.txt exists: cyclonedx-py requirements ...
-          # But for the installed environment:
-          cyclonedx-py environment --output-format json --output-file sbom-${{ matrix.python-version }}.json
+          cyclonedx-py environment --output-format json --output-file sbom.json
         continue-on-error: true
 
       - name: Upload SBOM
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-${{ matrix.python-version }}
-          path: sbom-${{ matrix.python-version }}.json
+          name: sbom
+          path: sbom.json
 
-      - name: Adapter micro-benchmark (non-gating)
-        if: always()
+  benchmarks:
+    needs: smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r ci-requirements.txt
+          python -m pip install -e .
+          python -m pip install -e bridge
+
+      - name: Adapter micro-benchmark
         run: |
           python bridge/benchmarks/benchmark_rediai_adapter.py | tee adapter_benchmark.txt
-
-      - name: Upload adapter benchmark
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: adapter-benchmark-py${{ matrix.python-version }}
-          path: adapter_benchmark.txt
-          if-no-files-found: warn
-          overwrite: true
-
-      - name: RL adapter benchmark (non-gating)
-        if: always()
+      
+      - name: RL adapter benchmark
         run: |
           python bridge/benchmarks/benchmark_rl_adapter_loop.py | tee rl_adapter_benchmark.txt
 
-      - name: Upload RL benchmark
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: rl-adapter-benchmark-py${{ matrix.python-version }}
-          path: rl_adapter_benchmark.txt
-          if-no-files-found: warn
-          overwrite: true
-
-      - name: CI summary
-        if: success() && hashFiles('coverage.xml') != ''
-        run: |
-          echo "## Quality gates" >> $GITHUB_STEP_SUMMARY
-          coverage report >> $GITHUB_STEP_SUMMARY

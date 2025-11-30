@@ -11,6 +11,7 @@ from ungar.games.high_card_duel import (
 )
 
 
+@pytest.mark.smoke
 def test_high_card_value() -> None:
     """Test card ranking logic."""
     c2 = Card(Suit.SPADES, Rank.TWO)
@@ -24,6 +25,7 @@ def test_high_card_value() -> None:
     assert high_card_value(ace) < high_card_value(joker)
 
 
+@pytest.mark.smoke
 def test_game_flow() -> None:
     """Test a full game flow with fixed hands."""
     # Mock state with known hands: P0 wins

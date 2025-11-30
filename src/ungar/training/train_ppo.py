@@ -88,7 +88,21 @@ def train_ppo(
         if logger is None:
             logger = FileLogger(paths.root, format="csv", filename="metrics.csv")
 
-        exporter = OverlayExporter(paths.overlays)
+        if config.xai.enabled:
+            from ungar.xai_methods import HandHighlightMethod, RandomOverlayMethod
+
+            methods = []
+            for m in config.xai.methods:
+                if m == "heuristic":
+                    methods.append(HandHighlightMethod())
+                elif m == "random":
+                    methods.append(RandomOverlayMethod())
+
+            exporter = OverlayExporter(
+                out_dir=paths.overlays,
+                methods=methods,  # type: ignore[arg-type]
+                max_overlays=config.xai.max_overlays_per_run,
+            )
 
     if logger is None:
         logger = NoOpLogger()
@@ -167,8 +181,29 @@ def train_ppo(
         rewards_history.append(episode_reward)
 
         # Log metrics
-        metrics = {"episode_reward": episode_reward, "episode_length": float(steps), **update_info}
+        metrics = {
+            "episode": i + 1,
+            "reward": episode_reward,
+            "episode_length": float(steps),
+            **update_info,
+        }
         logger.log_metrics(metrics, total_steps)
+
+        if exporter and (i + 1) % config.xai.every_n_episodes == 0:
+            current_player = state.current_player()
+            if current_player == -1:
+                current_player = 0
+            
+            tensor = state.to_tensor(current_player)
+            obs_flat = tensor.data.flatten().astype(np.float32)
+            
+            exporter.export(
+                obs=obs_flat,
+                action=0,
+                step=i + 1,
+                run_id=run_id or "unknown",
+                meta={"episode": i + 1, "game": game_name, "algo": "ppo"},
+            )
 
     if exporter:
         # Just save for now, we didn't collect any overlays in this loop yet

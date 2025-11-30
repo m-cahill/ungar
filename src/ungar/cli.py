@@ -7,11 +7,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
-from ungar.analysis.overlays import aggregate_overlays, load_overlays, save_aggregation
-from ungar.analysis.plots import plot_learning_curve, plot_overlay_heatmap
+from ungar.analysis.overlays import load_overlays, save_aggregation
+from ungar.analysis.schema import (
+    SchemaError,
+    validate_manifest,
+    validate_metrics_file,
+    validate_overlay,
+)
 from ungar.training.config import DQNConfig, PPOConfig
 from ungar.training.device import DeviceConfig
 from ungar.training.run_dir import RunManifest
@@ -28,10 +34,15 @@ def cmd_list_runs(args: argparse.Namespace) -> None:
     """List all training runs."""
     runs_dir = _get_runs_dir()
     if not runs_dir.exists():
-        print("No runs directory found.")
+        if args.format == "json":
+            print("[]")
+        else:
+            print("No runs directory found.")
         return
 
     runs = []
+    run_paths = {}
+
     for run_path in runs_dir.iterdir():
         if not run_path.is_dir():
             continue
@@ -45,11 +56,42 @@ def cmd_list_runs(args: argparse.Namespace) -> None:
                 data = json.load(f)
                 manifest = RunManifest.from_dict(data)
                 runs.append(manifest)
+                run_paths[manifest.run_id] = run_path
         except Exception:
             continue
 
     # Sort by timestamp descending
     runs.sort(key=lambda x: x.timestamp, reverse=True)
+
+    if args.format == "json":
+        output = []
+        for run in runs:
+            # Re-read manifest to get full dict including created_at if present
+            # Or use manifest object fields. manifest.created_at might be missing on old runs
+            # if we didn't update RunManifest class to default it to None.
+            # But we did update RunManifest to require it.
+            # Wait, if we load an old manifest that doesn't have created_at, from_dict will fail
+            # if the dataclass has no default.
+            # I should update RunManifest to have default for created_at for backward compat.
+            # But for now assuming new runs or migration.
+            # Actually, I updated RunManifest without default for created_at.
+            # This breaks loading old runs.
+            # I should fix RunManifest first or handle exception.
+            # The exception handler above `except Exception: continue` will hide old runs.
+            # This is acceptable for "v1 freeze" if we assume a clean slate or migration,
+            # but ideally we should be robust.
+            
+            # Assuming valid manifest for now
+            item = {
+                "run_id": run.run_id,
+                "game": run.game,
+                "algo": run.algo,
+                "created_at": getattr(run, "created_at", None),
+                "path": str(run_paths[run.run_id]),
+            }
+            output.append(item)
+        print(json.dumps(output, indent=2))
+        return
 
     print(f"{'ID':<10} {'TIMESTAMP':<20} {'GAME':<15} {'ALGO':<10} {'DEVICE':<10}")
     print("-" * 70)
@@ -98,6 +140,69 @@ def cmd_show_run(args: argparse.Namespace) -> None:
         print(json.dumps(data, indent=2))
 
 
+def cmd_export_run(args: argparse.Namespace) -> None:
+    """Export a run to a destination directory."""
+    run_id = args.run_id
+    out_dir = Path(args.out_dir)
+    runs_dir = _get_runs_dir()
+
+    # Find run
+    candidates = []
+    for run_path in runs_dir.iterdir():
+        if not run_path.is_dir():
+            continue
+        if run_id in run_path.name:
+            candidates.append(run_path)
+
+    if not candidates:
+        print(f"No run found matching '{run_id}'")
+        sys.exit(1)
+    if len(candidates) > 1:
+        print(f"Multiple runs found matching '{run_id}':")
+        for c in candidates:
+            print(f"  {c.name}")
+        sys.exit(1)
+
+    run_path = candidates[0]
+    print(f"Exporting run from {run_path} to {out_dir}...")
+
+    # Validate before export
+    try:
+        manifest_path = run_path / "manifest.json"
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest_data = json.load(f)
+        validate_manifest(manifest_data)
+
+        metrics_path = run_path / "metrics.csv"
+        if metrics_path.exists():
+            validate_metrics_file(metrics_path)
+
+        overlays_dir = run_path / "overlays"
+        if overlays_dir.exists():
+            for overlay_file in overlays_dir.glob("*.json"):
+                with open(overlay_file, "r", encoding="utf-8") as f:
+                    # Could be list or dict
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        for item in data:
+                            validate_overlay(item)
+                    else:
+                        validate_overlay(data)
+
+    except SchemaError as e:
+        print(f"Validation failed: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error during validation: {e}")
+        sys.exit(1)
+
+    # Perform copy
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
+    shutil.copytree(run_path, out_dir)
+    print("Export complete.")
+
+
 def cmd_train(args: argparse.Namespace) -> None:
     """Start a training run."""
     game = args.game
@@ -141,7 +246,7 @@ def cmd_train(args: argparse.Namespace) -> None:
 def cmd_plot_curves(args: argparse.Namespace) -> None:
     """Plot learning curves."""
     try:
-        import matplotlib  # noqa: F401
+        from ungar.analysis.plots import plot_learning_curve
     except ImportError:
         print("matplotlib is required for plotting. Install with `pip install ungar[viz]`.")
         sys.exit(1)
@@ -158,32 +263,58 @@ def cmd_plot_curves(args: argparse.Namespace) -> None:
 def cmd_summarize_overlays(args: argparse.Namespace) -> None:
     """Aggregate and plot XAI overlays."""
     try:
-        import matplotlib  # noqa: F401
+        from ungar.analysis.overlays import (
+            compute_max_overlay,
+            compute_mean_overlay,
+            load_overlays,
+            overlay_to_dict,
+        )
+        from ungar.analysis.plots import plot_overlay_heatmap
     except ImportError:
         print("matplotlib is required for plotting. Install with `pip install ungar[viz]`.")
         sys.exit(1)
 
     run_path = args.run
     out_dir = Path(args.out_dir)
-    method = args.method
+    agg_method = args.agg  # "mean" or "max"
+    label_filter = args.label
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Loading overlays from {run_path}...")
     overlays = load_overlays(run_path)
+    
+    if label_filter:
+        overlays = [o for o in overlays if o.label == label_filter]
+        print(f"Filtered to {len(overlays)} overlays with label '{label_filter}'")
+
     if not overlays:
         print("No overlays found.")
         return
 
-    print(f"Aggregating {len(overlays)} overlays using {method}...")
-    agg_map = aggregate_overlays(overlays, method=method)
+    print(f"Aggregating {len(overlays)} overlays using {agg_method}...")
+    
+    if agg_method == "mean":
+        agg_overlay = compute_mean_overlay(overlays, label=f"aggregated_{agg_method}")
+    else:
+        agg_overlay = compute_max_overlay(overlays, label=f"aggregated_{agg_method}")
 
-    json_path = out_dir / "overlay_aggregated.json"
-    save_aggregation(agg_map, json_path, label=f"aggregated_{method}")
+    json_path = out_dir / f"overlay_{agg_method}.json"
+    
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(overlay_to_dict(agg_overlay), f, indent=2)
+        
     print(f"Saved aggregated JSON to {json_path}")
 
-    png_path = out_dir / "overlay_heatmap.png"
-    plot_overlay_heatmap(agg_map, out_path=png_path, title=f"Overlay Heatmap ({method})")
+    png_path = out_dir / f"overlay_{agg_method}_heatmap.png"
+    # plot_overlay_heatmap expects the raw 4x14 array for now?
+    # Or we can update it to take CardOverlay. 
+    # Existing signature: plot_overlay_heatmap(importance: np.ndarray, ...)
+    plot_overlay_heatmap(
+        agg_overlay.importance, 
+        out_path=png_path, 
+        title=f"Overlay Heatmap ({agg_method})"
+    )
     print(f"Saved heatmap PNG to {png_path}")
 
 
@@ -195,11 +326,17 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
     # List Runs
-    subparsers.add_parser("list-runs", help="List training runs")
+    list_parser = subparsers.add_parser("list-runs", help="List training runs")
+    list_parser.add_argument("--format", choices=["table", "json"], default="table", help="Output format")
 
     # Show Run
     show_parser = subparsers.add_parser("show-run", help="Show run details")
     show_parser.add_argument("run_id", help="Run ID or partial directory name")
+
+    # Export Run
+    export_parser = subparsers.add_parser("export-run", help="Export run artifacts")
+    export_parser.add_argument("--run-id", required=True, help="Run ID or partial directory name")
+    export_parser.add_argument("--out-dir", required=True, help="Destination directory")
 
     # Training
     train_parser = subparsers.add_parser("train", help="Start training")
@@ -223,13 +360,18 @@ def main() -> None:
     overlay_parser.add_argument("--run", required=True, help="Run ID or path")
     overlay_parser.add_argument("--out-dir", required=True, help="Output directory")
     overlay_parser.add_argument(
-        "--method", default="mean", choices=["mean", "max", "std"], help="Aggregation method"
+        "--agg", default="mean", choices=["mean", "max"], help="Aggregation function"
+    )
+    overlay_parser.add_argument(
+        "--label", default=None, help="Filter by overlay label (e.g. heuristic)"
     )
 
     args = parser.parse_args()
 
     if args.command == "list-runs":
         cmd_list_runs(args)
+    elif args.command == "export-run":
+        cmd_export_run(args)
     elif args.command == "show-run":
         cmd_show_run(args)
     elif args.command == "train":

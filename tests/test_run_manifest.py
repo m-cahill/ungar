@@ -69,4 +69,4 @@ def test_train_dqn_with_run_dir(tmp_path: Path) -> None:
 
     # Check content
     content = metrics_path.read_text()
-    assert "episode_reward" in content
+    assert "reward" in content

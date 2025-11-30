@@ -52,8 +52,7 @@ disallow_untyped_defs = true
 warn_unused_ignores = true
 no_implicit_optional = true
 strict_equality = true
-# exclude = ["bridge/"]  <-- Removed per M06 Phase A3 to allow unified checking
-exclude = ["bridge/examples/"]
+# exclude = ["bridge/examples/"]  <-- Removed per M18-F
 
 [[tool.mypy.overrides]]
 module = "RediAI.*"
@@ -72,3 +71,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 addopts = "-q --maxfail=1 --disable-warnings --cov=src/ungar --cov=bridge/src/ungar_bridge --cov-report=xml"
 testpaths = ["tests", "bridge/tests"]
+markers = [
+    "smoke: fast, core tests (<2s)",
+    "full: slow, integration, or training tests",
+]

@@ -82,15 +82,26 @@ def train_dqn(
 
         if logger is None:
             # Use FileLogger in the structured dir
-            # FileLogger takes a directory and creates metrics_<timestamp>.csv
-            # But create_run_dir defines metrics.csv.
-            # We might need to adjust FileLogger or just let it create its own file in that dir.
-            # Ideally FileLogger should support a fixed filename.
-            # For now, let's point FileLogger to the root and let it name the file.
             logger = FileLogger(paths.root, format="csv", filename="metrics.csv")
 
         # Setup overlay exporter
-        exporter = OverlayExporter(paths.overlays)
+        if config.xai.enabled:
+            from ungar.xai_methods import HandHighlightMethod, RandomOverlayMethod
+
+            # Resolve methods
+            methods = []
+            for m in config.xai.methods:
+                if m == "heuristic":
+                    methods.append(HandHighlightMethod())
+                elif m == "random":
+                    methods.append(RandomOverlayMethod())
+                # Ignore unknown for now or log warning
+
+            exporter = OverlayExporter(
+                out_dir=paths.overlays,
+                methods=methods,  # type: ignore[arg-type]
+                max_overlays=config.xai.max_overlays_per_run,
+            )
 
     if logger is None:
         logger = NoOpLogger()
@@ -182,12 +193,40 @@ def train_dqn(
         # Log episode metrics
         logger.log_metrics(
             {
-                "episode_reward": episode_reward,
+                "episode": i + 1,
+                "reward": episode_reward,
                 "epsilon": agent.epsilon,
                 "episode_length": float(steps),
             },
             total_steps,
         )
+
+        if exporter and (i + 1) % config.xai.every_n_episodes == 0:
+            # Export overlay for the final state of the episode
+            # Note: state is terminal if done=True
+            # Use 'state' which is the last observed state
+            current_player = state.current_player()
+            if current_player == -1:
+                # Game over, maybe no specific player view, pick 0
+                current_player = 0
+            
+            tensor = state.to_tensor(current_player)
+            obs_flat = tensor.data.flatten().astype(np.float32)
+            
+            # Action is tricky: we took an action to get here, but state is next state.
+            # Ideally we want (s, a) pair. We have 'transition' variable from last step.
+            # Or we just use the last state and say "at end of episode".
+            # For now, let's pass dummy action 0 or last action if available.
+            # We don't track last action explicitly outside loop.
+            # Let's use 0.
+            
+            exporter.export(
+                obs=obs_flat,
+                action=0,
+                step=i + 1,
+                run_id=actual_run_dir.name if actual_run_dir else "unknown",
+                meta={"episode": i + 1, "game": game_name, "algo": "dqn"},
+            )
 
     if exporter:
         # Just save for now, we didn't collect any overlays in this loop yet

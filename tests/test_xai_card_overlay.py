@@ -14,13 +14,27 @@ def test_card_overlay_shape_validation() -> None:
     """Test that CardOverlay validates the importance matrix shape."""
     # Correct shape (4, 14)
     valid_importance = np.zeros((4, 14))
-    overlay = CardOverlay(importance=valid_importance, label="test", meta={})
+    overlay = CardOverlay(
+        run_id="test",
+        label="test",
+        agg="none",
+        step=0,
+        importance=valid_importance,
+        meta={}
+    )
     assert overlay.importance.shape == (4, 14)
 
     # Incorrect shape
     invalid_importance = np.zeros((4, 13))
     with pytest.raises(ValueError, match="shape"):
-        CardOverlay(importance=invalid_importance, label="test", meta={})
+        CardOverlay(
+            run_id="test",
+            label="test",
+            agg="none",
+            step=0,
+            importance=invalid_importance,
+            meta={}
+        )
 
 
 def test_zero_overlay() -> None:
@@ -45,7 +59,14 @@ def test_overlay_serialization_roundtrip() -> None:
     importance[3, 13] = 0.5  # Joker
 
     meta = {"game": "test", "round": 1}
-    original = CardOverlay(importance=importance, label="test_roundtrip", meta=meta)
+    original = CardOverlay(
+        run_id="test_run",
+        label="test_roundtrip",
+        agg="mean",
+        step=10,
+        importance=importance,
+        meta=meta
+    )
 
     # Serialize
     data = overlay_to_dict(original)
