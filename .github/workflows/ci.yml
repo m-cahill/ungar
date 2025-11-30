@@ -23,18 +23,34 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
+          cache-dependency-path: |
+            ci-requirements.txt
+            requirements-dev.txt
 
       - name: Install dev dependencies (Core)
         run: |
           python -m pip install -U pip
-          python -m pip install -r requirements-dev.txt
+          # Install CPU-only torch first
+          python -m pip install -r ci-requirements.txt
+          # Install other dev deps, skipping deps to avoid pulling CUDA torch
+          python -m pip install -r requirements-dev.txt --no-deps
           # Explicitly install security tools if not in requirements
-          python -m pip install bandit pip-audit cyclonedx-bom
+          python -m pip install bandit pip-audit cyclonedx-bom --no-deps
 
       - name: Install Bridge Dependencies
         run: |
-          python -m pip install -e .
-          python -m pip install -e bridge
+          python -m pip install -e . --no-deps
+          python -m pip install -e bridge --no-deps
+
+      - name: Ensure no CUDA packages are installed
+        run: |
+          pip freeze | grep -i 'cuda' && (echo "CUDA package found!"; exit 1) || echo "No CUDA packages."
+
+      - name: Fail fast if UNGAR imports
+        run: python -c "import ungar"
+
+      - name: Ensure torch is CPU-only
+        run: python scripts/ensure_cpu_only.py
 
       - name: Lint and Typecheck (Combined)
         run: |
