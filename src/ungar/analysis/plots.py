@@ -1,14 +1,32 @@
-"""Visualization tools for training metrics and overlays."""
+"""Visualization tools for training metrics and overlays.
+
+These functions are optional and require Matplotlib to be installed.
+In CI we deliberately *do not* install Matplotlib, so this module must
+degrade gracefully when it's missing.
+"""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import List
 
-import matplotlib.pyplot as plt
 import numpy as np
 from ungar.analysis.metrics import load_metrics
 from ungar.enums import RANK_COUNT, SUIT_COUNT
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None  # type: ignore[assignment]
+
+
+def _require_matplotlib() -> None:
+    """Raise a clear error if Matplotlib is not available."""
+    if plt is None:
+        raise RuntimeError(
+            "Matplotlib is required for plotting. Install UNGAR with "
+            "`pip install 'ungar[viz]'` or add `matplotlib` to your environment."
+        )
 
 
 def plot_learning_curve(
@@ -18,6 +36,8 @@ def plot_learning_curve(
     metric: str = "rewards",
 ) -> None:
     """Plot learning curves for one or more runs."""
+    _require_matplotlib()
+
     plt.figure(figsize=(10, 6))
 
     for run_dir in run_dirs:
@@ -61,6 +81,8 @@ def plot_overlay_heatmap(
     title: str = "Card Importance Heatmap",
 ) -> None:
     """Plot a 4x14 heatmap of card importance."""
+    _require_matplotlib()
+
     plt.figure(figsize=(12, 5))  # Avoid magic number 4
 
     # Setup grid
