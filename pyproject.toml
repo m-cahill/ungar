@@ -65,6 +65,10 @@ ignore_missing_imports = true
 follow_imports = "skip"
 disable_error_code = ["import-untyped"]
 
+[[tool.mypy.overrides]]
+module = ["matplotlib", "matplotlib.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 addopts = "-q --maxfail=1 --disable-warnings --cov=src/ungar --cov=bridge/src/ungar_bridge --cov-report=xml"
 testpaths = ["tests", "bridge/tests"]
