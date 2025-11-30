@@ -1,6 +1,6 @@
 # Analytics & Visualization
 
-M15 introduces tools for analyzing training runs, plotting learning curves, and aggregating XAI overlays.
+M15 introduces tools for analyzing training runs, plotting learning curves, and aggregating XAI overlays. M16 wraps these in the unified `ungar` CLI.
 
 ## Run Directory Structure
 
@@ -21,10 +21,8 @@ runs/
 
 ```bash
 # Will create a run directory in runs/
-python -m ungar.training.train_dqn --run_dir runs/my_experiment
+ungar train --game high_card_duel --algo dqn --run-dir runs/my_experiment
 ```
-
-(Note: CLI wrappers for training scripts are planned for M16, currently use python scripts or wrappers).
 
 ### Analyzing Metrics
 
@@ -41,6 +39,12 @@ print(df.rewards)
 
 Requires `matplotlib` (`pip install ungar[viz]`).
 
+**CLI:**
+```bash
+ungar plot-curves --run runs/my_run --out curve.png
+```
+
+**Python:**
 ```python
 from ungar.analysis.plots import plot_learning_curve
 
@@ -55,6 +59,12 @@ plot_learning_curve(["runs/dqn_run", "runs/ppo_run"], out_path="comparison.png")
 
 Summarize card importance over an entire training run:
 
+**CLI:**
+```bash
+ungar summarize-overlays --run runs/my_run --out-dir heatmaps/
+```
+
+**Python:**
 ```python
 from ungar.analysis.overlays import load_overlays, aggregate_overlays
 from ungar.analysis.plots import plot_overlay_heatmap

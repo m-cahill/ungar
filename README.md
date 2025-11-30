@@ -111,3 +111,25 @@ M11 adds **Gin Rummy**, a complex imperfect-information game with draw/discard m
 * **M02** – Game definitions (High Card Duel) & runner interface (Done).
 * **M03** – Security & supply-chain hardening: Bandit, pip-audit, cyclonedx SBOM, basic SLSA provenance for artifacts (Done).
 * **M04** – Bridge Package & External Integration (Done).
+* **M05** – RediAI Integration (Bridge-Level) (Done).
+* **M06** – Bridge Quality & Coverage Hardening (Done).
+* **M07** – Codebase Audit & Refinement (Done).
+* **M08** – RediAI Training Workflow & XAI Scaffold (Done).
+* **M09** – Deep RediAI Integration (XAI/RewardLab) (Done).
+* **M10** – Multi-Game Platform Validation with Mini Spades (Done).
+* **M11** – Gin Rummy & Advanced State Encoding (Done).
+* **M12** – Unified Agents & DQN-Lite (Done).
+* **M13** – PPO Algorithm & Config Layer (Done).
+* **M14** – Backend Device & Logging (Done).
+* **M15** – Analytics & Visualization Tools (Done).
+* **M16** – Unified CLI (Done).
+
+## Documentation
+
+* [docs/cli_quickstart.md](docs/cli_quickstart.md): **Start Here!** 5-minute guide.
+* [bridge/README.md](bridge/README.md): Bridge package usage.
+* [docs/bridge_rediai.md](docs/bridge_rediai.md): Detailed RediAI integration docs.
+* [docs/ungar_agents.md](docs/ungar_agents.md): Unified Agent system (DQN/Random).
+* [docs/training_dqn.md](docs/training_dqn.md): Training guide for DQN.
+* [docs/training_ppo.md](docs/training_ppo.md): Training guide for PPO.
+* [docs/analytics_overview.md](docs/analytics_overview.md): Analysis and Visualization tools (M15).
