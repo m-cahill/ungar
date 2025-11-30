@@ -8,7 +8,7 @@ degrade gracefully when it's missing.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
+from typing import Any, List, cast
 
 import numpy as np
 from ungar.analysis.metrics import load_metrics
@@ -17,7 +17,7 @@ from ungar.enums import RANK_COUNT, SUIT_COUNT
 try:
     import matplotlib.pyplot as plt
 except ImportError:
-    plt = None  # type: ignore[assignment]
+    plt = cast(Any, None)
 
 
 def _require_matplotlib() -> None:
