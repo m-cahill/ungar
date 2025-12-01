@@ -107,6 +107,40 @@ def aggregate_overlays(overlays: List[CardOverlay], method: str = "mean") -> np.
         raise ValueError(f"Unknown aggregation method: {method}")
 
 
+def compare_overlays(
+    overlays_a: List[CardOverlay], overlays_b: List[CardOverlay]
+) -> CardOverlay:
+    """Compute difference overlay (mean(A) - mean(B))."""
+    if not overlays_a or not overlays_b:
+        raise ValueError("Cannot compare empty overlay lists")
+
+    mean_a = compute_mean_overlay(overlays_a)
+    mean_b = compute_mean_overlay(overlays_b)
+    
+    diff_imp = mean_a.importance - mean_b.importance
+    
+    # Optional: Normalize diff? M20 plan says "Optionally normalize... but don't renormalize to sum 1"
+    # "divide by max(|diff|) if you want values in [-1, 1]"
+    # Let's do that for easier visualization
+    max_abs = np.max(np.abs(diff_imp))
+    if max_abs > 1e-9:
+        diff_imp = diff_imp / max_abs
+        
+    return CardOverlay(
+        run_id=f"{mean_a.run_id}_vs_{mean_b.run_id}",
+        label="comparison",
+        agg="diff",
+        step=-1,
+        importance=diff_imp,
+        meta={
+            "aggregated": True,
+            "comparison": True,
+            "count_a": len(overlays_a),
+            "count_b": len(overlays_b)
+        },
+    )
+
+
 def save_aggregation(
     importance: np.ndarray, out_path: str | Path, label: str = "aggregated"
 ) -> None:

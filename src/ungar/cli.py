@@ -307,12 +307,66 @@ def cmd_summarize_overlays(args: argparse.Namespace) -> None:
 
     png_path = out_dir / f"overlay_{agg_method}_heatmap.png"
     # plot_overlay_heatmap expects the raw 4x14 array for now?
-    # Or we can update it to take CardOverlay.
+    # Or we can update it to take CardOverlay. 
     # Existing signature: plot_overlay_heatmap(importance: np.ndarray, ...)
     plot_overlay_heatmap(
-        agg_overlay.importance, out_path=png_path, title=f"Overlay Heatmap ({agg_method})"
+        agg_overlay.importance, 
+        out_path=png_path, 
+        title=f"Overlay Heatmap ({agg_method})"
     )
     print(f"Saved heatmap PNG to {png_path}")
+
+
+def cmd_compare_overlays(args: argparse.Namespace) -> None:
+    """Compare two sets of overlays."""
+    try:
+        from ungar.analysis.overlays import (
+            compare_overlays,
+            load_overlays,
+            overlay_to_dict,
+        )
+        from ungar.analysis.plots import plot_overlay_heatmap
+    except ImportError:
+        print("matplotlib is required for plotting. Install with `pip install ungar[viz]`.")
+        sys.exit(1)
+
+    run_path = args.run
+    out_file = Path(args.out)
+    label_a = args.label_a
+    label_b = args.label_b
+    agg_method = args.agg
+
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+
+    print(f"Loading overlays from {run_path}...")
+    all_overlays = load_overlays(run_path)
+    
+    overlays_a = [o for o in all_overlays if o.label == label_a]
+    overlays_b = [o for o in all_overlays if o.label == label_b]
+    
+    if not overlays_a:
+        print(f"No overlays found for label '{label_a}'")
+        return
+    if not overlays_b:
+        print(f"No overlays found for label '{label_b}'")
+        return
+
+    print(f"Comparing {len(overlays_a)} '{label_a}' vs {len(overlays_b)} '{label_b}' (agg={agg_method})...")
+    
+    diff_overlay = compare_overlays(overlays_a, overlays_b)
+    
+    with open(out_file, "w", encoding="utf-8") as f:
+        json.dump(overlay_to_dict(diff_overlay), f, indent=2)
+    print(f"Saved comparison JSON to {out_file}")
+    
+    # Plot
+    png_path = out_file.with_suffix(".png")
+    plot_overlay_heatmap(
+        diff_overlay.importance,
+        out_path=png_path,
+        title=f"Comparison: {label_a} - {label_b}"
+    )
+    print(f"Saved comparison heatmap to {png_path}")
 
 
 def main() -> None:
@@ -365,6 +419,14 @@ def main() -> None:
         "--label", default=None, help="Filter by overlay label (e.g. heuristic)"
     )
 
+    # Compare Overlays
+    compare_parser = subparsers.add_parser("compare-overlays", help="Compare two overlay sets")
+    compare_parser.add_argument("--run", required=True, help="Run ID or path")
+    compare_parser.add_argument("--label-a", required=True, help="First label (A)")
+    compare_parser.add_argument("--label-b", required=True, help="Second label (B)")
+    compare_parser.add_argument("--agg", default="mean", choices=["mean"], help="Aggregation method (currently only mean)")
+    compare_parser.add_argument("--out", required=True, help="Output JSON file path")
+
     args = parser.parse_args()
 
     if args.command == "list-runs":
@@ -379,6 +441,8 @@ def main() -> None:
         cmd_plot_curves(args)
     elif args.command == "summarize-overlays":
         cmd_summarize_overlays(args)
+    elif args.command == "compare-overlays":
+        cmd_compare_overlays(args)
     else:
         parser.print_help()
 

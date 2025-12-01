@@ -84,10 +84,10 @@ class DQNLiteAgent:
         self.steps = 0
 
         # Networks
-        self.q_net = QNetwork(input_dim, action_space_size)
+        self.policy_net = QNetwork(input_dim, action_space_size)  # Renamed from q_net to standard
         self.target_net = QNetwork(input_dim, action_space_size)
-        self.target_net.load_state_dict(self.q_net.state_dict())
-        self.optimizer = optim.Adam(self.q_net.parameters(), lr=lr)
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=lr)
 
         # Buffer
         self.memory = ReplayBuffer(buffer_size)
@@ -111,7 +111,7 @@ class DQNLiteAgent:
         # Exploitation
         with torch.no_grad():
             state_t = torch.FloatTensor(obs).unsqueeze(0)
-            q_values = self.q_net(state_t)
+            q_values = self.policy_net(state_t)
 
             # Mask illegal moves with -inf
             mask = torch.full_like(q_values, float("-inf"))
@@ -137,7 +137,7 @@ class DQNLiteAgent:
         dones = torch.FloatTensor([float(t.done) for t in batch]).unsqueeze(1)
 
         # Q(s, a)
-        curr_q = self.q_net(states).gather(1, actions)
+        curr_q = self.policy_net(states).gather(1, actions)
 
         # max Q(s', a') masked by legal moves
         with torch.no_grad():
@@ -174,15 +174,15 @@ class DQNLiteAgent:
         self.optimizer.step()
 
         # Soft update target net
-        for target_param, param in zip(self.target_net.parameters(), self.q_net.parameters()):
+        for target_param, param in zip(self.target_net.parameters(), self.policy_net.parameters()):
             target_param.data.copy_(
                 self.target_update_tau * param.data
                 + (1.0 - self.target_update_tau) * target_param.data
             )
 
     def save(self, path: str) -> None:
-        torch.save(self.q_net.state_dict(), path)
+        torch.save(self.policy_net.state_dict(), path)
 
     def load(self, path: str) -> None:
-        self.q_net.load_state_dict(torch.load(path))
-        self.target_net.load_state_dict(self.q_net.state_dict())
+        self.policy_net.load_state_dict(torch.load(path))
+        self.target_net.load_state_dict(self.policy_net.state_dict())

@@ -98,7 +98,7 @@ XAI attribution maps stored as JSON files in the `overlays/` subdirectory.
 
 *   `heuristic`: Rule-based importance (e.g., cards in hand).
 *   `random`: Noise (for baseline/testing).
-*   `policy`: Gradient/saliency w.r.t policy output.
+*   `policy_grad`: Gradient/saliency w.r.t policy output (or Q-value).
 *   `value`: Gradient/saliency w.r.t value output.
 
 ### Aggregation Semantics

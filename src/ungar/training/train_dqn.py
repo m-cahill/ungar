@@ -86,7 +86,12 @@ def train_dqn(
 
         # Setup overlay exporter
         if config.xai.enabled:
-            from ungar.xai_methods import HandHighlightMethod, OverlayMethod, RandomOverlayMethod
+            from ungar.xai_methods import (
+                HandHighlightMethod,
+                OverlayMethod,
+                PolicyGradOverlayMethod,
+                RandomOverlayMethod,
+            )
 
             # Resolve methods
             methods: list[OverlayMethod] = []
@@ -95,14 +100,21 @@ def train_dqn(
                     methods.append(HandHighlightMethod())
                 elif m == "random":
                     methods.append(RandomOverlayMethod())
+                elif m == "policy_grad":
+                    # For DQN, model is agent.policy_net
+                    # But DQNLiteAgent doesn't expose it directly yet?
+                    # It's usually agent.policy_net or similar.
+                    # DQNLiteAgent is imported. Let's check it.
+                    # It has self.policy_net.
+                    # But 'agent' is created below. We need to create exporter AFTER agent?
+                    # Yes.
+                    pass
                 # Ignore unknown for now or log warning
 
-            exporter = OverlayExporter(
-                out_dir=paths.overlays,
-                methods=methods,
-                max_overlays=config.xai.max_overlays_per_run,
-            )
-
+            # We'll create exporter later after agent is ready if policy_grad is needed.
+            # Or refactor to init methods late.
+            # Let's move this block AFTER agent init.
+            
     if logger is None:
         logger = NoOpLogger()
 
@@ -127,7 +139,31 @@ def train_dqn(
         target_update_tau=config.target_update_tau,
         seed=seed,
     )
+    
+    # NOW setup exporter with agent reference if needed
+    if config.xai.enabled:
+        from ungar.xai_methods import (
+            HandHighlightMethod,
+            OverlayMethod,
+            PolicyGradOverlayMethod,
+            RandomOverlayMethod,
+        )
 
+        methods = []
+        for m in config.xai.methods:
+            if m == "heuristic":
+                methods.append(HandHighlightMethod())
+            elif m == "random":
+                methods.append(RandomOverlayMethod())
+            elif m == "policy_grad":
+                methods.append(PolicyGradOverlayMethod(agent.policy_net, game_name))
+
+        exporter = OverlayExporter(
+            out_dir=paths.overlays if run_dir else Path("."),
+            methods=methods,
+            max_overlays=config.xai.max_overlays_per_run,
+        )
+    
     rewards_history = []
     total_steps = 0
 

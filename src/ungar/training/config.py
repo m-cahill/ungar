@@ -30,6 +30,7 @@ class XAIConfig:
     methods: list[str] = field(default_factory=lambda: ["heuristic"])
     every_n_episodes: int = 10
     max_overlays_per_run: int = 200
+    max_grad_overlay_steps: int | None = None  # M20-C: Limit gradient overlay frequency
 
 
 @dataclass

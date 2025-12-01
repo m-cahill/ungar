@@ -29,8 +29,9 @@ config = DQNConfig(
 
 *   **`heuristic`**: Highlights cards currently in the agent's hand (normalized). Useful for sanity checking observation encoding.
 *   **`random`**: Generates a random heatmap. Useful for testing the pipeline.
-*   *(Future)* `policy_grad`: Saliency from policy gradient.
-*   *(Future)* `value_grad`: Saliency from value function.
+*   **`policy_grad`**: Saliency from policy gradient.
+    *   **DQN**: Gradient of Q-value for the chosen action w.r.t. input.
+    *   **PPO**: Gradient of the chosen action's logit w.r.t. input.
 
 ## 2. Artifacts
 
@@ -69,6 +70,23 @@ ungar summarize-overlays --run runs/<id> --label random --agg max --out-dir anal
 *   `overlay_mean.json`: The aggregated overlay object.
 *   `overlay_mean_heatmap.png`: A visualization of the 4x14 grid.
 
+### Compare Overlays
+
+Compute the difference between two sets of overlays (e.g., gradient vs heuristic).
+
+```bash
+ungar compare-overlays \
+    --run runs/<id> \
+    --label-a policy_grad \
+    --label-b heuristic \
+    --agg mean \
+    --out comparison.json
+```
+
+**Outputs:**
+*   `comparison.json`: A valid overlay object representing `(mean(A) - mean(B))`, normalized.
+*   `comparison.png`: Heatmap of the difference.
+
 ## 4. Integration Guide
 
 ### Adding a New Method
@@ -82,9 +100,44 @@ ungar summarize-overlays --run runs/<id> --label random --agg max --out-dir anal
         def compute(self, obs, action, *, step, run_id, meta=None) -> CardOverlay:
             # ... logic to produce 4x14 importance matrix ...
             return CardOverlay(...)
+## 5. Example Walkthrough
+
+1.  **Train with gradient XAI:**
+
+    ```bash
+    # (Assuming config is set in code or passed via a future CLI flag)
+    # Enable "policy_grad" in your DQNConfig
+    python bridge/examples/train_high_card_duel.py
     ```
 
-2.  Register it in the training loop (currently hardcoded in `train_dqn.py` / `train_ppo.py` factory logic, to be dynamic in M20).
+2.  **Inspect outputs:**
+
+    ```bash
+    ls runs/<latest_run>/overlays/
+    # Should see policy_grad_*.json files
+    ```
+
+3.  **Compare:**
+
+    ```bash
+    ungar compare-overlays \
+        --run runs/<latest_run> \
+        --label-a policy_grad \
+        --label-b heuristic \
+        --agg mean \
+        --out diff.json
+    ```
+
+4.  **Result:** `diff.png` shows where the agent's attention (gradient) differs from the ground truth (heuristic).
+
+### Gradient Method Details
+
+*   **Scalar Target:**
+    *   **DQN:** $Q(s, a_{taken})$
+    *   **PPO:** Logit of $a_{taken}$
+*   **Aggregation:** Gradients are summed across feature planes (channels) to produce a single scalar per card position.
+*   **Normalization:** $L_1$ norm (sum to 1). Magnitudes are absolute.
+
 
 
 

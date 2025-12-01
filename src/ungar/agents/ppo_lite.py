@@ -88,8 +88,8 @@ class PPOLiteAgent:
         self.config = config
         self.action_space_size = action_space_size
 
-        self.network = ActorCritic(input_dim, action_space_size)
-        self.optimizer = optim.Adam(self.network.parameters(), lr=config.learning_rate)
+        self.actor = ActorCritic(input_dim, action_space_size)  # Renamed network to actor for consistency
+        self.optimizer = optim.Adam(self.actor.parameters(), lr=config.learning_rate)
 
         # Buffer for current rollout
         self.buffer: List[PPOTransition] = []
@@ -103,7 +103,7 @@ class PPOLiteAgent:
         with torch.no_grad():
             obs_t = torch.FloatTensor(obs).unsqueeze(0)
             mask_t = torch.FloatTensor(mask).unsqueeze(0)
-            action, logprob, _, value = self.network.get_action_and_value(obs_t, mask_t)
+            action, logprob, _, value = self.actor.get_action_and_value(obs_t, mask_t)
 
         action_idx = int(action.item())
 
@@ -189,7 +189,7 @@ class PPOLiteAgent:
                 end = start + self.config.minibatch_size
                 mb_inds = b_inds[start:end]
 
-                _, newlogprob, entropy, newvalue = self.network.get_action_and_value(
+                _, newlogprob, entropy, newvalue = self.actor.get_action_and_value(
                     obs[mb_inds], masks[mb_inds], actions[mb_inds]
                 )
 
@@ -231,7 +231,7 @@ class PPOLiteAgent:
         return {"loss": float(loss.item())}
 
     def save(self, path: str) -> None:
-        torch.save(self.network.state_dict(), path)
+        torch.save(self.actor.state_dict(), path)
 
     def load(self, path: str) -> None:
-        self.network.load_state_dict(torch.load(path))
+        self.actor.load_state_dict(torch.load(path))
