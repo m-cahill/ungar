@@ -52,8 +52,8 @@ def compute_policy_grad_importance(
     # Here we assume we receive the tensor that goes INTO the model.
     # If the model takes flat input, we pass flat input.
     
-    is_flat = len(obs_tensor.shape) == 1
-    is_batch_flat = len(obs_tensor.shape) == 2
+    _is_flat = len(obs_tensor.shape) == 1
+    _is_batch_flat = len(obs_tensor.shape) == 2
     
     # If we get structured input (4, 14, N), we might need to flatten it for the model
     # BUT we need to track gradients on the original structured tensor if possible,
