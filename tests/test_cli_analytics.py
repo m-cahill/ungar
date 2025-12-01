@@ -25,7 +25,7 @@ def runs_dir(tmp_path: Path) -> Path:
     """Create a temporary runs directory with one valid run."""
     d = tmp_path / "runs"
     d.mkdir()
-    
+
     # Create a valid run
     paths = create_run_dir(
         game="high_card_duel",
@@ -35,11 +35,11 @@ def runs_dir(tmp_path: Path) -> Path:
         base_dir=d,
         run_id="test_run",
     )
-    
+
     # Create valid metrics
     with open(paths.metrics, "w", encoding="utf-8") as f:
         f.write("step,episode,reward\n1,1,0.5\n")
-        
+
     return d
 
 
@@ -52,7 +52,7 @@ def test_list_runs_json(runs_dir: Path, capsys: pytest.CaptureFixture) -> None:
 
     captured = capsys.readouterr()
     output = json.loads(captured.out)
-    
+
     assert isinstance(output, list)
     assert len(output) == 1
     assert output[0]["run_id"] == "test_run"
@@ -85,12 +85,12 @@ def test_export_run_invalid_schema(runs_dir: Path, tmp_path: Path) -> None:
     # Corrupt the manifest
     run_path = runs_dir / [x for x in runs_dir.iterdir()][0]
     manifest_path = run_path / "manifest.json"
-    
+
     with open(manifest_path, "r") as f:
         data = json.load(f)
-    
+
     del data["algo"]  # Make it invalid
-    
+
     with open(manifest_path, "w") as f:
         json.dump(data, f)
 
@@ -110,7 +110,7 @@ def test_cli_help_runs_without_viz_deps() -> None:
     # The 'ungar' command might not be in path during test if not installed in venv,
     # so we invoke via python -m ungar.cli or similar if needed.
     # But project structure has ungar script. Let's try python -m ungar.cli
-    
+
     result = subprocess.run(
         [sys.executable, "-m", "ungar.cli", "--help"],
         capture_output=True,
