@@ -13,7 +13,7 @@ from ungar.analysis.schema import (
 
 
 @pytest.mark.smoke
-def test_validate_manifest_valid():
+def test_validate_manifest_valid() -> None:
     manifest = {
         "run_id": "test_run",
         "game": "high_card",
@@ -27,7 +27,7 @@ def test_validate_manifest_valid():
     validate_manifest(manifest)
 
 
-def test_validate_manifest_missing_field():
+def test_validate_manifest_missing_field() -> None:
     manifest = {
         "run_id": "test_run",
         "game": "high_card",
@@ -40,7 +40,7 @@ def test_validate_manifest_missing_field():
         validate_manifest(manifest)
 
 
-def test_validate_manifest_wrong_type():
+def test_validate_manifest_wrong_type() -> None:
     manifest = {
         "run_id": 123,  # Should be string
         "game": "high_card",
@@ -53,7 +53,7 @@ def test_validate_manifest_wrong_type():
         validate_manifest(manifest)
 
 
-def test_validate_metrics_file_valid(tmp_path: Path):
+def test_validate_metrics_file_valid(tmp_path: Path) -> None:
     metrics_path = tmp_path / "metrics.csv"
     with open(metrics_path, "w", newline="") as f:
         writer = csv.writer(f)
@@ -66,7 +66,7 @@ def test_validate_metrics_file_valid(tmp_path: Path):
     validate_metrics_file(metrics_path)
 
 
-def test_validate_metrics_file_missing_header(tmp_path: Path):
+def test_validate_metrics_file_missing_header(tmp_path: Path) -> None:
     metrics_path = tmp_path / "metrics.csv"
     with open(metrics_path, "w", newline="") as f:
         f.write("1,1,0.5\n")
@@ -75,7 +75,7 @@ def test_validate_metrics_file_missing_header(tmp_path: Path):
         validate_metrics_file(metrics_path)
 
 
-def test_validate_metrics_file_unsorted(tmp_path: Path):
+def test_validate_metrics_file_unsorted(tmp_path: Path) -> None:
     metrics_path = tmp_path / "metrics.csv"
     with open(metrics_path, "w", newline="") as f:
         writer = csv.writer(f)
@@ -87,7 +87,7 @@ def test_validate_metrics_file_unsorted(tmp_path: Path):
         validate_metrics_file(metrics_path)
 
 
-def test_validate_overlay_valid():
+def test_validate_overlay_valid() -> None:
     # 4 suits, 14 ranks
     importance = [[0.0] * 14 for _ in range(4)]
     overlay = {
@@ -99,7 +99,7 @@ def test_validate_overlay_valid():
     validate_overlay(overlay)
 
 
-def test_validate_overlay_bad_shape():
+def test_validate_overlay_bad_shape() -> None:
     # 3 suits instead of 4
     importance = [[0.0] * 14 for _ in range(3)]
     overlay = {

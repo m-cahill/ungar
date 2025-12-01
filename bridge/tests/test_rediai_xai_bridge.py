@@ -45,7 +45,7 @@ async def test_log_overlays_as_artifact(tmp_path: Path) -> None:
         ),
     ]
 
-    bridge = RediAIXAIBridge(recorder)  # type: ignore
+    bridge = RediAIXAIBridge(recorder)
     bridge.log_overlays(overlays, "test_overlays")
 
     assert "test_overlays" in recorder.artifacts

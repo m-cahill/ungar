@@ -86,10 +86,10 @@ def train_dqn(
 
         # Setup overlay exporter
         if config.xai.enabled:
-            from ungar.xai_methods import HandHighlightMethod, RandomOverlayMethod
+            from ungar.xai_methods import HandHighlightMethod, OverlayMethod, RandomOverlayMethod
 
             # Resolve methods
-            methods = []
+            methods: list[OverlayMethod] = []
             for m in config.xai.methods:
                 if m == "heuristic":
                     methods.append(HandHighlightMethod())
@@ -99,7 +99,7 @@ def train_dqn(
 
             exporter = OverlayExporter(
                 out_dir=paths.overlays,
-                methods=methods,  # type: ignore[arg-type]
+                methods=methods,
                 max_overlays=config.xai.max_overlays_per_run,
             )
 

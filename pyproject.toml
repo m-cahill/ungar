@@ -55,6 +55,10 @@ strict_equality = true
 # exclude = ["bridge/examples/"]  <-- Removed per M18-F
 
 [[tool.mypy.overrides]]
+module = ["pandas", "pandas.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = "RediAI.*"
 ignore_missing_imports = true
 

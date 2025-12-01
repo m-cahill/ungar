@@ -1,27 +1,35 @@
 """Integration test ensuring training produces valid analytics artifacts."""
 
 import json
+from argparse import Namespace
 from pathlib import Path
 
 from ungar.analysis.schema import validate_manifest, validate_metrics_file
 from ungar.cli import cmd_train
 
 
+def make_args(**kwargs: object) -> Namespace:
+    """Helper to create argparse.Namespace objects."""
+    ns = Namespace()
+    for key, value in kwargs.items():
+        setattr(ns, key, value)
+    return ns
+
+
 def test_training_produces_valid_schema(tmp_path: Path) -> None:
     """Run a minimal training session and validate output artifacts."""
     run_dir = tmp_path / "runs"
 
-    class Args:
-        pass
-
-    Args.game = "high_card_duel"
-    Args.algo = "dqn"
-    Args.episodes = 2
-    Args.run_dir = str(run_dir)
-    Args.device = "cpu"
+    args = make_args(
+        game="high_card_duel",
+        algo="dqn",
+        episodes=2,
+        run_dir=str(run_dir),
+        device="cpu",
+    )
 
     # 1. Run training
-    cmd_train(Args())  # type: ignore
+    cmd_train(args)
 
     # 2. Verify run directory creation
     assert run_dir.exists()

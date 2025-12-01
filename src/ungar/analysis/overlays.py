@@ -29,10 +29,18 @@ def load_overlays(run_dir: str | Path) -> List[CardOverlay]:
             # M19: We might have single dict now too.
             if isinstance(data_list, list):
                 for item in data_list:
-                    overlays.append(overlay_from_dict(item))
+                    from typing import cast
+
+                    from ungar.xai import CardOverlayDict
+
+                    overlays.append(overlay_from_dict(cast(CardOverlayDict, item)))
             elif isinstance(data_list, dict):
                 # Single overlay
-                overlays.append(overlay_from_dict(data_list))
+                from typing import cast
+
+                from ungar.xai import CardOverlayDict
+
+                overlays.append(overlay_from_dict(cast(CardOverlayDict, data_list)))
             else:
                 # Should be list based on OverlayExporter
                 pass

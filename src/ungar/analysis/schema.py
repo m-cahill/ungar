@@ -12,7 +12,7 @@ try:
     HAS_PANDAS = True
 except ImportError:
     HAS_PANDAS = False
-    pd = None  # type: ignore[assignment]
+    pd = None
 
 from ungar.enums import RANK_COUNT, SUIT_COUNT
 
