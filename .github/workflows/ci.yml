@@ -49,7 +49,10 @@ jobs:
           mypy .
 
       - name: Smoke Tests
-        run: pytest -m smoke
+        run: |
+          # Smoke tests are a fast subset; we don't enforce the 70% coverage gate here.
+          # The 'tests-full' job below enforces strict coverage.
+          pytest -m smoke --cov-fail-under=0
 
   tests-full:
     needs: smoke
