@@ -1,10 +1,9 @@
 """Tests for analytics schema validation."""
 
 import csv
-import json
-import pytest
 from pathlib import Path
 
+import pytest
 from ungar.analysis.schema import (
     SchemaError,
     validate_manifest,
@@ -62,7 +61,7 @@ def test_validate_metrics_file_valid(tmp_path: Path):
         writer.writerow([1, 1, 0.5, 0.1])
         writer.writerow([2, 1, 0.6, 0.05])
         writer.writerow([3, 2, 0.7, 0.04])
-    
+
     # Should not raise
     validate_metrics_file(metrics_path)
 
@@ -71,7 +70,7 @@ def test_validate_metrics_file_missing_header(tmp_path: Path):
     metrics_path = tmp_path / "metrics.csv"
     with open(metrics_path, "w", newline="") as f:
         f.write("1,1,0.5\n")
-    
+
     with pytest.raises(SchemaError, match="missing required columns"):
         validate_metrics_file(metrics_path)
 
@@ -83,7 +82,7 @@ def test_validate_metrics_file_unsorted(tmp_path: Path):
         writer.writerow(["step", "episode", "reward"])
         writer.writerow([2, 1, 0.6])
         writer.writerow([1, 1, 0.5])  # Unsorted
-    
+
     with pytest.raises(SchemaError, match="not sorted"):
         validate_metrics_file(metrics_path)
 
@@ -120,4 +119,3 @@ def test_validate_overlay_bad_shape():
     }
     with pytest.raises(SchemaError, match="must have 14 columns"):
         validate_overlay(overlay)
-

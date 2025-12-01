@@ -92,7 +92,7 @@ def test_plot_curves_smoke(tmp_path: Path) -> None:
     # or patch sys.modules before the function runs if we want to mock the module itself.
     # But cmd_plot_curves does: from ungar.analysis.plots import plot_learning_curve
     # So we should patch ungar.analysis.plots.plot_learning_curve
-    
+
     with patch("ungar.analysis.plots.plot_learning_curve") as mock_plot:
         # Mock matplotlib import check inside CLI
         with patch.dict(sys.modules, {"matplotlib": MagicMock()}):
@@ -105,13 +105,12 @@ def test_summarize_overlays_smoke(tmp_path: Path) -> None:
     # Similarly, imports are local now.
     # We need a real-ish overlay for load_overlays return value, because compute_mean_overlay checks shape.
     from ungar.xai import zero_overlay
-    
+
     real_overlay = zero_overlay("test")
-    
+
     with patch("ungar.analysis.overlays.load_overlays", return_value=[real_overlay]), patch(
-        "ungar.analysis.overlays.save_aggregation"), patch(
-        "ungar.analysis.plots.plot_overlay_heatmap"
-    ), patch.dict(
+        "ungar.analysis.overlays.save_aggregation"
+    ), patch("ungar.analysis.plots.plot_overlay_heatmap"), patch.dict(
         sys.modules, {"matplotlib": MagicMock()}
     ):
         run_cli(["summarize-overlays", "--run", "some/path", "--out-dir", str(tmp_path)])

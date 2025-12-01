@@ -60,7 +60,7 @@ def validate_manifest(manifest: Dict[str, Any]) -> None:
         # The prompt says "Treat analytics_schema_version as required".
         pass
         # raise SchemaError("Manifest missing analytics_schema_version")
-    
+
     # If present, check it
     if version is not None:
         if not isinstance(version, int):
@@ -94,7 +94,7 @@ def validate_metrics_file(path: Path | str) -> None:
                 raise SchemaError(f"Metrics file missing required columns: {missing}")
 
             last_step = -1
-            
+
             for i, row in enumerate(reader):
                 # Check types and ordering
                 try:
@@ -105,8 +105,10 @@ def validate_metrics_file(path: Path | str) -> None:
                     raise SchemaError(f"Metrics file has invalid types at row {i+2}: {e}")
 
                 if step < last_step:
-                    raise SchemaError(f"Metrics file not sorted by step at row {i+2} ({step} < {last_step})")
-                
+                    raise SchemaError(
+                        f"Metrics file not sorted by step at row {i+2} ({step} < {last_step})"
+                    )
+
                 last_step = step
 
     except Exception as e:
@@ -126,7 +128,7 @@ def validate_metrics(df: Any) -> None:
     """
     if not HAS_PANDAS:
         raise ImportError("pandas is required for validate_metrics(df)")
-    
+
     if not isinstance(df, pd.DataFrame):
         raise SchemaError("Input must be a pandas DataFrame")
 
@@ -167,7 +169,9 @@ def validate_overlay(payload: Dict[str, Any]) -> None:
         raise SchemaError("Overlay 'importance' must be a list of lists")
 
     if len(importance) != SUIT_COUNT:
-        raise SchemaError(f"Overlay 'importance' must have {SUIT_COUNT} rows (suits), got {len(importance)}")
+        raise SchemaError(
+            f"Overlay 'importance' must have {SUIT_COUNT} rows (suits), got {len(importance)}"
+        )
 
     for i, row in enumerate(importance):
         if not isinstance(row, list):
@@ -180,4 +184,3 @@ def validate_overlay(payload: Dict[str, Any]) -> None:
         for val in row:
             if not isinstance(val, (int, float)):
                 raise SchemaError(f"Overlay 'importance' contains non-numeric value: {val}")
-

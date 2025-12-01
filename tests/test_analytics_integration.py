@@ -34,14 +34,13 @@ def test_training_produces_valid_schema(tmp_path: Path) -> None:
     assert manifest_path.exists()
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = json.load(f)
-    
+
     # This checks required fields including created_at and analytics_schema_version
     validate_manifest(manifest)
 
     # 4. Validate Metrics
     metrics_path = run_path / "metrics.csv"
     assert metrics_path.exists()
-    
+
     # This checks headers and content (including episode column)
     validate_metrics_file(metrics_path)
-

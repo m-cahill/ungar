@@ -40,13 +40,11 @@ def load_overlays(run_dir: str | Path) -> List[CardOverlay]:
     return overlays
 
 
-def compute_mean_overlay(
-    overlays: List[CardOverlay], label: str = "mean"
-) -> CardOverlay:
+def compute_mean_overlay(overlays: List[CardOverlay], label: str = "mean") -> CardOverlay:
     """Compute the mean of a list of overlays."""
     if not overlays:
         raise ValueError("Cannot compute mean of empty overlay list")
-    
+
     # Check consistency (naive check)
     first = overlays[0]
     for o in overlays[1:]:
@@ -55,7 +53,7 @@ def compute_mean_overlay(
 
     stack = np.stack([o.importance for o in overlays])
     mean_imp = np.mean(stack, axis=0)
-    
+
     return CardOverlay(
         run_id=first.run_id,  # Assume same run, or use "aggregated"
         label=label,
@@ -66,16 +64,14 @@ def compute_mean_overlay(
     )
 
 
-def compute_max_overlay(
-    overlays: List[CardOverlay], label: str = "max"
-) -> CardOverlay:
+def compute_max_overlay(overlays: List[CardOverlay], label: str = "max") -> CardOverlay:
     """Compute the max of a list of overlays."""
     if not overlays:
         raise ValueError("Cannot compute max of empty overlay list")
 
     stack = np.stack([o.importance for o in overlays])
     max_imp = np.max(stack, axis=0)
-    
+
     return CardOverlay(
         run_id=overlays[0].run_id,
         label=label,

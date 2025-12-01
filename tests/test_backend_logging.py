@@ -5,7 +5,6 @@ from pathlib import Path
 
 from ungar.training.logger import FileLogger
 from ungar.training.overlay_exporter import OverlayExporter
-from ungar.xai import zero_overlay
 
 
 def test_file_logger_csv(tmp_path: Path) -> None:
@@ -31,23 +30,19 @@ def test_file_logger_csv(tmp_path: Path) -> None:
 def test_overlay_exporter(tmp_path: Path) -> None:
     """Test overlay export to JSON."""
     # M19 updated OverlayExporter signature
-    from ungar.xai_methods import RandomOverlayMethod
     import numpy as np
-    
-    exporter = OverlayExporter(
-        out_dir=tmp_path,
-        methods=[RandomOverlayMethod()],
-        max_overlays=10
-    )
+    from ungar.xai_methods import RandomOverlayMethod
+
+    exporter = OverlayExporter(out_dir=tmp_path, methods=[RandomOverlayMethod()], max_overlays=10)
 
     # export() computes and saves directly
-    obs = np.zeros(56) # 4x14 flattened
+    obs = np.zeros(56)  # 4x14 flattened
     exporter.export(obs=obs, action=0, step=1, run_id="test_run")
     exporter.export(obs=obs, action=0, step=2, run_id="test_run")
 
     files = list(tmp_path.glob("*.json"))
     assert len(files) == 2
-    
+
     # Check content of one
     with open(files[0], "r", encoding="utf-8") as f:
         data = json.load(f)

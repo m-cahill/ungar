@@ -193,10 +193,10 @@ def train_ppo(
             current_player = state.current_player()
             if current_player == -1:
                 current_player = 0
-            
+
             tensor = state.to_tensor(current_player)
             obs_flat = tensor.data.flatten().astype(np.float32)
-            
+
             exporter.export(
                 obs=obs_flat,
                 action=0,

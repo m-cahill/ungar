@@ -108,7 +108,7 @@ jobs:
         run: |
           python -m pip install -U pip
           python -m pip install -r requirements-dev.txt --no-deps
-          python -m pip install bandit pip-audit --no-deps
+          python -m pip install bandit pip-audit
 
       - name: Bandit Security Scan
         run: bandit -r src -lll -f json -o bandit.json

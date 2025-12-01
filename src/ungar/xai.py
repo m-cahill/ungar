@@ -114,7 +114,9 @@ def overlay_from_dict(data: CardOverlayDict) -> CardOverlay:
     """
     arr = np.array(data["importance"], dtype=float)
     return CardOverlay(
-        run_id=data.get("run_id", "unknown"),  # Backwards compat if needed, though M17 strictly requires it
+        run_id=data.get(
+            "run_id", "unknown"
+        ),  # Backwards compat if needed, though M17 strictly requires it
         label=data["label"],
         agg=data.get("agg", "none"),
         step=data.get("step", 0),

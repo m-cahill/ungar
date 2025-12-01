@@ -15,12 +15,7 @@ def test_card_overlay_shape_validation() -> None:
     # Correct shape (4, 14)
     valid_importance = np.zeros((4, 14))
     overlay = CardOverlay(
-        run_id="test",
-        label="test",
-        agg="none",
-        step=0,
-        importance=valid_importance,
-        meta={}
+        run_id="test", label="test", agg="none", step=0, importance=valid_importance, meta={}
     )
     assert overlay.importance.shape == (4, 14)
 
@@ -28,12 +23,7 @@ def test_card_overlay_shape_validation() -> None:
     invalid_importance = np.zeros((4, 13))
     with pytest.raises(ValueError, match="shape"):
         CardOverlay(
-            run_id="test",
-            label="test",
-            agg="none",
-            step=0,
-            importance=invalid_importance,
-            meta={}
+            run_id="test", label="test", agg="none", step=0, importance=invalid_importance, meta={}
         )
 
 
@@ -65,7 +55,7 @@ def test_overlay_serialization_roundtrip() -> None:
         agg="mean",
         step=10,
         importance=importance,
-        meta=meta
+        meta=meta,
     )
 
     # Serialize

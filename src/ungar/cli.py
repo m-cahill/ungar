@@ -11,7 +11,6 @@ import shutil
 import sys
 from pathlib import Path
 
-from ungar.analysis.overlays import load_overlays, save_aggregation
 from ungar.analysis.schema import (
     SchemaError,
     validate_manifest,
@@ -80,7 +79,7 @@ def cmd_list_runs(args: argparse.Namespace) -> None:
             # The exception handler above `except Exception: continue` will hide old runs.
             # This is acceptable for "v1 freeze" if we assume a clean slate or migration,
             # but ideally we should be robust.
-            
+
             # Assuming valid manifest for now
             item = {
                 "run_id": run.run_id,
@@ -283,7 +282,7 @@ def cmd_summarize_overlays(args: argparse.Namespace) -> None:
 
     print(f"Loading overlays from {run_path}...")
     overlays = load_overlays(run_path)
-    
+
     if label_filter:
         overlays = [o for o in overlays if o.label == label_filter]
         print(f"Filtered to {len(overlays)} overlays with label '{label_filter}'")
@@ -293,27 +292,25 @@ def cmd_summarize_overlays(args: argparse.Namespace) -> None:
         return
 
     print(f"Aggregating {len(overlays)} overlays using {agg_method}...")
-    
+
     if agg_method == "mean":
         agg_overlay = compute_mean_overlay(overlays, label=f"aggregated_{agg_method}")
     else:
         agg_overlay = compute_max_overlay(overlays, label=f"aggregated_{agg_method}")
 
     json_path = out_dir / f"overlay_{agg_method}.json"
-    
+
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(overlay_to_dict(agg_overlay), f, indent=2)
-        
+
     print(f"Saved aggregated JSON to {json_path}")
 
     png_path = out_dir / f"overlay_{agg_method}_heatmap.png"
     # plot_overlay_heatmap expects the raw 4x14 array for now?
-    # Or we can update it to take CardOverlay. 
+    # Or we can update it to take CardOverlay.
     # Existing signature: plot_overlay_heatmap(importance: np.ndarray, ...)
     plot_overlay_heatmap(
-        agg_overlay.importance, 
-        out_path=png_path, 
-        title=f"Overlay Heatmap ({agg_method})"
+        agg_overlay.importance, out_path=png_path, title=f"Overlay Heatmap ({agg_method})"
     )
     print(f"Saved heatmap PNG to {png_path}")
 
@@ -327,7 +324,9 @@ def main() -> None:
 
     # List Runs
     list_parser = subparsers.add_parser("list-runs", help="List training runs")
-    list_parser.add_argument("--format", choices=["table", "json"], default="table", help="Output format")
+    list_parser.add_argument(
+        "--format", choices=["table", "json"], default="table", help="Output format"
+    )
 
     # Show Run
     show_parser = subparsers.add_parser("show-run", help="Show run details")

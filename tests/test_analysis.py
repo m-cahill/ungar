@@ -7,8 +7,6 @@ import numpy as np
 import pytest
 from ungar.analysis.metrics import load_metrics
 from ungar.analysis.overlays import aggregate_overlays, load_overlays
-from ungar.training.overlay_exporter import OverlayExporter
-from ungar.xai import zero_overlay
 
 
 @pytest.fixture
@@ -28,16 +26,17 @@ def sample_run_dir(tmp_path: Path) -> Path:
     # Create overlays
     overlay_dir = run_dir / "overlays"
     overlay_dir.mkdir(parents=True, exist_ok=True)
-    
-    from ungar.xai import zero_overlay, overlay_to_dict
+
     import json
-    
+
+    from ungar.xai import overlay_to_dict, zero_overlay
+
     # We serialize as LIST of overlays per file because load_overlays expects that
-    # OR we need to see how load_overlays is implemented. 
+    # OR we need to see how load_overlays is implemented.
     # M17 docs said: One file per run + method.
     # M19 plan says: runs/<run_id>/overlays/<label>_<step>.json (single overlay per file)
     # Let's check load_overlays implementation in src/ungar/analysis/overlays.py
-    
+
     # Overlay 1: uniform 0.5
     o1 = zero_overlay("test")
     o1.importance.fill(0.5)

@@ -53,15 +53,15 @@ class OverlayExporter:
                 run_id=run_id,
                 meta=meta,
             )
-            
+
             # Save individual file per overlay as per plan M19-B
             # runs/<run_id>/overlays/<label>_<step>.json
             # But we might have multiple methods, so include label in filename
             filename = f"{method.label}_{step}.json"
             output_path = self.out_dir / filename
-            
+
             data = overlay_to_dict(overlay)
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
-            
+
             self.count += 1

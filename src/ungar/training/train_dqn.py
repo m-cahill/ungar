@@ -209,17 +209,17 @@ def train_dqn(
             if current_player == -1:
                 # Game over, maybe no specific player view, pick 0
                 current_player = 0
-            
+
             tensor = state.to_tensor(current_player)
             obs_flat = tensor.data.flatten().astype(np.float32)
-            
+
             # Action is tricky: we took an action to get here, but state is next state.
             # Ideally we want (s, a) pair. We have 'transition' variable from last step.
             # Or we just use the last state and say "at end of episode".
             # For now, let's pass dummy action 0 or last action if available.
             # We don't track last action explicitly outside loop.
             # Let's use 0.
-            
+
             exporter.export(
                 obs=obs_flat,
                 action=0,
