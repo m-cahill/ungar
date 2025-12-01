@@ -86,7 +86,8 @@ jobs:
             --cov=src/ungar \
             --cov=bridge/src/ungar_bridge \
             --cov-report=xml \
-            --cov-report=term-missing
+            --cov-report=term-missing \
+            --cov-fail-under=83
           coverage report --fail-under=83
 
       - name: Upload coverage.xml
