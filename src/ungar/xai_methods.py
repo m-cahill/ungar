@@ -55,10 +55,10 @@ class OverlayMethod(Protocol):
         """
         return [
             self.compute(
-                obs=item["obs"],
-                action=item.get("action", 0),
-                step=item["step"],
-                run_id=item["run_id"],
+                obs=item["obs"],  # type: ignore[arg-type]
+                action=item.get("action", 0),  # type: ignore[arg-type]
+                step=item["step"],  # type: ignore[arg-type]
+                run_id=item["run_id"],  # type: ignore[arg-type]
                 meta=item.get("meta"),
             )
             for item in batch

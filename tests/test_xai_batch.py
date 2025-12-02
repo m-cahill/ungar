@@ -161,10 +161,10 @@ def test_policy_grad_batch_matches_sequential() -> None:
     # Compute sequentially
     sequential_overlays = [
         method.compute(
-            obs=item["obs"],
-            action=item["action"],
-            step=item["step"],
-            run_id=item["run_id"],
+            obs=item["obs"],  # type: ignore[arg-type]
+            action=item["action"],  # type: ignore[arg-type]
+            step=item["step"],  # type: ignore[arg-type]
+            run_id=item["run_id"],  # type: ignore[arg-type]
             meta=item["meta"],
         )
         for item in batch
@@ -222,10 +222,10 @@ def test_value_grad_batch_matches_sequential() -> None:
     # Compute sequentially
     sequential_overlays = [
         method.compute(
-            obs=item["obs"],
-            action=item["action"],
-            step=item["step"],
-            run_id=item["run_id"],
+            obs=item["obs"],  # type: ignore[arg-type]
+            action=item["action"],  # type: ignore[arg-type]
+            step=item["step"],  # type: ignore[arg-type]
+            run_id=item["run_id"],  # type: ignore[arg-type]
             meta=item["meta"],
         )
         for item in batch
