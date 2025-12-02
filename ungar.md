@@ -113,6 +113,29 @@ python scripts/demo_m22_full_cycle.py
 
 See [docs/demo_m22.md](docs/demo_m22.md) for complete documentation and validation criteria.
 
+## v1 Core Contract
+
+**The interfaces described in [`docs/api_contracts_v1.md`](docs/api_contracts_v1.md) represent the v1 core contract for UNGAR.**
+
+This contract is considered **stable and production-ready** as of M23. Future milestones must treat changes to these interfaces as potentially breaking:
+
+- **4×14×n card tensor representation**
+- **CardOverlay structure and XAI methods**
+- **Analytics schema v1** (`manifest.json`, `metrics.csv`, overlay files)
+- **CLI commands** (`train`, `list-runs`, `show-run`, `summarize-overlays`)
+
+**Contract guarantees:**
+- Within v1.x, no breaking changes to these interfaces
+- New features will be additive (backward compatible)
+- Breaking changes require major version bump (v2.0)
+
+**Architecture decisions:**
+- See [`docs/adr/`](docs/adr/) for rationale behind key design choices
+- ADR-001: Analytics schema freeze
+- ADR-002: XAI overlay engine design
+- ADR-003: Opt-in batch processing
+- ADR-004: Per-method buffer architecture
+
 ## Frontend Status & Integration
 
 The UNGAR frontend is currently **frozen** at v1 (mock-only).

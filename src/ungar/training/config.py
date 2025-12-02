@@ -26,6 +26,9 @@ class AlgorithmConfig:
 class XAIConfig:
     """Configuration for Explainable AI (XAI) overlays."""
 
+    # Valid XAI method labels (v1 contract)
+    VALID_METHODS = ["heuristic", "random", "policy_grad", "value_grad"]
+
     enabled: bool = False
     methods: list[str] = field(default_factory=lambda: ["heuristic"])
     every_n_episodes: int = 10
@@ -34,12 +37,22 @@ class XAIConfig:
     batch_size: int | None = None  # M22: Batch overlay generation (1-32, None=sequential)
 
     def __post_init__(self) -> None:
-        """Validate configuration parameters (M22)."""
+        """Validate configuration parameters (M22, M23)."""
+        # Validate batch size (M22)
         if self.batch_size is not None and not (1 <= self.batch_size <= 32):
             raise ValueError(
                 "XAIConfig.batch_size must be between 1 and 32 (inclusive). "
                 f"Got {self.batch_size}."
             )
+
+        # Validate methods (M23)
+        for method in self.methods:
+            if method not in self.VALID_METHODS:
+                raise ValueError(
+                    f"Unknown method '{method}'. "
+                    f"Available: {', '.join(self.VALID_METHODS)}. "
+                    "See docs/xai_overlays.md for details."
+                )
 
 
 @dataclass

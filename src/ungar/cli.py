@@ -24,6 +24,29 @@ from ungar.training.train_dqn import train_dqn
 from ungar.training.train_ppo import train_ppo
 
 
+def _get_version_string() -> str:
+    """Get version string with commit hash (M23)."""
+    from ungar import __version__
+    import subprocess
+
+    try:
+        # Try to get git commit hash
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=1,
+            check=False,
+        )
+        if result.returncode == 0:
+            commit = result.stdout.strip()
+            return f"UNGAR {__version__} (commit {commit})"
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+
+    return f"UNGAR {__version__}"
+
+
 def _get_runs_dir() -> Path:
     """Return default runs directory."""
     return Path("runs")
@@ -393,7 +416,11 @@ def cmd_compare_overlays(args: argparse.Namespace) -> None:
 def main() -> None:
     """Main CLI entrypoint."""
     parser = argparse.ArgumentParser(
-        description="UNGAR: Universal Neural Grid for Analysis and Research"
+        description="UNGAR: Universal Neural Grid for Analysis and Research",
+        epilog="See docs/quickstart_v1.md for getting started guide.",
+    )
+    parser.add_argument(
+        "--version", action="version", version=_get_version_string(), help="Show version and exit"
     )
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
@@ -429,22 +456,40 @@ def main() -> None:
         help="Device to use",
     )
     train_parser.add_argument("--seed", type=int, help="Random seed for reproducibility")
-    # XAI parameters
-    train_parser.add_argument(
-        "--xai-enabled", action="store_true", help="Enable XAI overlay generation"
+    
+    # XAI parameters (M19-M22)
+    xai_group = train_parser.add_argument_group(
+        "XAI Options", "Explainable AI overlay generation (see docs/xai_overlays.md)"
     )
-    train_parser.add_argument(
+    xai_group.add_argument(
+        "--xai-enabled",
+        action="store_true",
+        help="Enable XAI overlay generation",
+    )
+    xai_group.add_argument(
         "--xai-methods",
         nargs="+",
-        help="XAI methods (heuristic, random, policy_grad, value_grad)",
+        metavar="METHOD",
+        help="XAI methods: heuristic, random, policy_grad, value_grad (space-separated)",
     )
-    train_parser.add_argument(
-        "--xai-batch-size", type=int, help="Batch size for overlay generation"
+    xai_group.add_argument(
+        "--xai-batch-size",
+        type=int,
+        metavar="N",
+        help="Batch size for gradient overlays (1-32, enables M22 batch engine)",
     )
-    train_parser.add_argument(
-        "--xai-every-n-episodes", type=int, help="Generate overlays every N episodes"
+    xai_group.add_argument(
+        "--xai-every-n-episodes",
+        type=int,
+        metavar="N",
+        help="Generate overlays every N episodes (default: 10)",
     )
-    train_parser.add_argument("--xai-max-overlays", type=int, help="Maximum overlays per run")
+    xai_group.add_argument(
+        "--xai-max-overlays",
+        type=int,
+        metavar="N",
+        help="Maximum overlays per run (default: 200)",
+    )
 
     # Analysis
     plot_parser = subparsers.add_parser("plot-curves", help="Plot learning curves")
