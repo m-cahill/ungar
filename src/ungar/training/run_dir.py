@@ -71,7 +71,9 @@ def create_run_dir(
         run_id = str(uuid.uuid4())[:8]
 
     timestamp = time.time()
-    created_at = datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc).isoformat()
+    created_at = datetime.datetime.fromtimestamp(
+        timestamp, tz=datetime.timezone.utc
+    ).isoformat()
 
     # Format: <timestamp_int>_<game>_<algo>_<short_id>
     dirname = f"{int(timestamp)}_{game}_{algo}_{run_id}"

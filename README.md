@@ -123,6 +123,11 @@ M11 adds **Gin Rummy**, a complex imperfect-information game with draw/discard m
 * **M14** – Backend Device & Logging (Done).
 * **M15** – Analytics & Visualization Tools (Done).
 * **M16** – Unified CLI (Done).
+* **M17** – Analytics Contracts & Frontend v1 Freeze (Done).
+* **M18** – CI Stabilization & Security Hardening (Done).
+* **M19** – XAI Overlay Engine v1: Heuristic & Random (Done).
+* **M20** – Gradient-Based XAI (`policy_grad`) + Overlay Comparison (Done).
+* **M21** – Value-Gradient XAI (`value_grad`, PPO-only) (Done).
 
 ## Documentation
 

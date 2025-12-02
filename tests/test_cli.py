@@ -96,7 +96,15 @@ def test_plot_curves_smoke(tmp_path: Path) -> None:
     with patch("ungar.analysis.plots.plot_learning_curve") as mock_plot:
         # Mock matplotlib import check inside CLI
         with patch.dict(sys.modules, {"matplotlib": MagicMock()}):
-            run_cli(["plot-curves", "--run", "some/path", "--out", str(tmp_path / "curve.png")])
+            run_cli(
+                [
+                    "plot-curves",
+                    "--run",
+                    "some/path",
+                    "--out",
+                    str(tmp_path / "curve.png"),
+                ]
+            )
             mock_plot.assert_called_once()
 
 
@@ -108,31 +116,44 @@ def test_summarize_overlays_smoke(tmp_path: Path) -> None:
 
     real_overlay = zero_overlay("test")
 
-    with patch("ungar.analysis.overlays.load_overlays", return_value=[real_overlay]), patch(
-        "ungar.analysis.overlays.save_aggregation"
-    ), patch("ungar.analysis.plots.plot_overlay_heatmap"), patch.dict(
-        sys.modules, {"matplotlib": MagicMock()}
+    with (
+        patch("ungar.analysis.overlays.load_overlays", return_value=[real_overlay]),
+        patch("ungar.analysis.overlays.save_aggregation"),
+        patch("ungar.analysis.plots.plot_overlay_heatmap"),
+        patch.dict(sys.modules, {"matplotlib": MagicMock()}),
     ):
-        run_cli(["summarize-overlays", "--run", "some/path", "--out-dir", str(tmp_path)])
+        run_cli(
+            ["summarize-overlays", "--run", "some/path", "--out-dir", str(tmp_path)]
+        )
 
 
 def test_compare_overlays_smoke(tmp_path: Path) -> None:
     """Test compare-overlays CLI (smoke test)."""
     from ungar.xai import zero_overlay
-    
+
     o1 = zero_overlay("A")
     o2 = zero_overlay("B")
-    
-    with patch("ungar.analysis.overlays.load_overlays", return_value=[o1, o2]), patch(
-        "ungar.analysis.overlays.compare_overlays", return_value=zero_overlay("diff")
-    ), patch("ungar.analysis.plots.plot_overlay_heatmap"), patch.dict(
-        sys.modules, {"matplotlib": MagicMock()}
+
+    with (
+        patch("ungar.analysis.overlays.load_overlays", return_value=[o1, o2]),
+        patch(
+            "ungar.analysis.overlays.compare_overlays",
+            return_value=zero_overlay("diff"),
+        ),
+        patch("ungar.analysis.plots.plot_overlay_heatmap"),
+        patch.dict(sys.modules, {"matplotlib": MagicMock()}),
     ):
-        run_cli([
-            "compare-overlays",
-            "--run", "some/path",
-            "--label-a", "A",
-            "--label-b", "B",
-            "--out", str(tmp_path / "diff.json")
-        ])
+        run_cli(
+            [
+                "compare-overlays",
+                "--run",
+                "some/path",
+                "--label-a",
+                "A",
+                "--label-b",
+                "B",
+                "--out",
+                str(tmp_path / "diff.json"),
+            ]
+        )
         assert (tmp_path / "diff.json").exists()

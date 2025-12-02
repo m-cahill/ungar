@@ -84,7 +84,15 @@ If RediAI is installed, metrics like average reward are logged to the workflow. 
 *   **M10:** Multi-Game Platform Validation with Mini Spades (Done).
 *   **M11:** Gin Rummy & Advanced State Encoding (Done).
 *   **M12:** Unified Agents & DQN-Lite (Done).
+*   **M13:** PPO Algorithm & Config Layer (Done).
+*   **M14:** Backend Device & Logging (Done).
+*   **M15:** Analytics & Visualization Tools (Done).
+*   **M16:** Unified CLI (Done).
 *   **M17:** Analytics Contracts & Frontend v1 Freeze (Done).
+*   **M18:** CI Stabilization & Security Hardening (Done).
+*   **M19:** XAI Overlay Engine v1: Heuristic & Random (Done).
+*   **M20:** Gradient-Based XAI (`policy_grad`) + Overlay Comparison (Done).
+*   **M21:** Value-Gradient XAI (`value_grad`, PPO-only) (Done).
 
 ## Frontend Status & Integration
 

@@ -49,8 +49,19 @@ class ActorCritic(nn.Module):
     def get_value(self, x: torch.Tensor) -> torch.Tensor:
         return self.critic(self.feature_net(x))
 
+    def get_logits(self, x: torch.Tensor) -> torch.Tensor:
+        """Get raw policy logits (for XAI gradient introspection)."""
+        return self.actor(self.feature_net(x))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass returns policy logits (for compatibility with gradient XAI)."""
+        return self.get_logits(x)
+
     def get_action_and_value(
-        self, x: torch.Tensor, legal_masks: torch.Tensor, action: torch.Tensor | None = None
+        self,
+        x: torch.Tensor,
+        legal_masks: torch.Tensor,
+        action: torch.Tensor | None = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         features = self.feature_net(x)
         logits = self.actor(features)
@@ -66,9 +77,16 @@ class ActorCritic(nn.Module):
             action_tensor = probs.sample()
         else:
             # Normalize any incoming type to a proper LongTensor on the same device
-            action_tensor = torch.as_tensor(action, dtype=torch.long, device=logits.device)
+            action_tensor = torch.as_tensor(
+                action, dtype=torch.long, device=logits.device
+            )
 
-        return action_tensor, probs.log_prob(action_tensor), probs.entropy(), self.critic(features)
+        return (
+            action_tensor,
+            probs.log_prob(action_tensor),
+            probs.entropy(),
+            self.critic(features),
+        )
 
 
 class PPOLiteAgent:
@@ -88,7 +106,9 @@ class PPOLiteAgent:
         self.config = config
         self.action_space_size = action_space_size
 
-        self.actor = ActorCritic(input_dim, action_space_size)  # Renamed network to actor for consistency
+        self.actor = ActorCritic(
+            input_dim, action_space_size
+        )  # Renamed network to actor for consistency
         self.optimizer = optim.Adam(self.actor.parameters(), lr=config.learning_rate)
 
         # Buffer for current rollout
@@ -112,7 +132,11 @@ class PPOLiteAgent:
         # Actually, UnifiedAgent protocol act() returns int.
         # We need a way to store logprob/value for the training step.
         # We'll store it in a temporary variable "last_act_info".
-        self._last_act_info = {"logprob": logprob.item(), "value": value.item(), "mask": mask}
+        self._last_act_info = {
+            "logprob": logprob.item(),
+            "value": value.item(),
+            "mask": mask,
+        }
 
         return action_idx
 
@@ -175,7 +199,11 @@ class PPOLiteAgent:
                 - float(values[t])
             )
             advantages[t] = lastgaelam = (
-                delta + self.config.gamma * self.config.gae_lambda * nextnonterminal * lastgaelam
+                delta
+                + self.config.gamma
+                * self.config.gae_lambda
+                * nextnonterminal
+                * lastgaelam
             )
 
         returns = advantages + values

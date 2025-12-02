@@ -10,11 +10,21 @@ def test_compute_mean_overlay() -> None:
     """Test averaging overlays."""
     # Overlay 1: all 1s
     o1 = CardOverlay(
-        run_id="r1", label="test", agg="none", step=1, importance=np.ones((4, 14)), meta={}
+        run_id="r1",
+        label="test",
+        agg="none",
+        step=1,
+        importance=np.ones((4, 14)),
+        meta={},
     )
     # Overlay 2: all 3s
     o2 = CardOverlay(
-        run_id="r1", label="test", agg="none", step=2, importance=np.full((4, 14), 3.0), meta={}
+        run_id="r1",
+        label="test",
+        agg="none",
+        step=2,
+        importance=np.full((4, 14), 3.0),
+        meta={},
     )
 
     mean_o = compute_mean_overlay([o1, o2])

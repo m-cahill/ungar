@@ -75,6 +75,7 @@ def train_ppo(
 
     # Setup run directory if requested
     exporter: OverlayExporter | None = None
+    paths = None
 
     if run_dir:
         paths = create_run_dir(
@@ -87,22 +88,6 @@ def train_ppo(
         )
         if logger is None:
             logger = FileLogger(paths.root, format="csv", filename="metrics.csv")
-
-        if config.xai.enabled:
-            from ungar.xai_methods import HandHighlightMethod, OverlayMethod, RandomOverlayMethod
-
-            methods: list[OverlayMethod] = []
-            for m in config.xai.methods:
-                if m == "heuristic":
-                    methods.append(HandHighlightMethod())
-                elif m == "random":
-                    methods.append(RandomOverlayMethod())
-
-            exporter = OverlayExporter(
-                out_dir=paths.overlays,
-                methods=methods,
-                max_overlays=config.xai.max_overlays_per_run,
-            )
 
     if logger is None:
         logger = NoOpLogger()
@@ -119,6 +104,37 @@ def train_ppo(
         action_space_size=adapter.action_space_size,
         config=config,
     )
+
+    # Setup XAI overlay exporter after agent is ready (M21-C)
+    if config.xai.enabled and paths is not None:
+        from ungar.xai_methods import (
+            HandHighlightMethod,
+            OverlayMethod,
+            PolicyGradOverlayMethod,
+            RandomOverlayMethod,
+            ValueGradOverlayMethod,
+        )
+
+        methods: list[OverlayMethod] = []
+        for m in config.xai.methods:
+            if m == "heuristic":
+                methods.append(HandHighlightMethod())
+            elif m == "random":
+                methods.append(RandomOverlayMethod())
+            elif m == "policy_grad":
+                # For PPO, pass the actor network (which outputs logits)
+                methods.append(PolicyGradOverlayMethod(agent.actor, game_name))
+            elif m == "value_grad":
+                # For PPO, pass the full ActorCritic network (has get_value method)
+                methods.append(
+                    ValueGradOverlayMethod(agent.actor, game_name, algo="ppo")
+                )
+
+        exporter = OverlayExporter(
+            out_dir=paths.overlays,
+            methods=methods,
+            max_overlays=config.xai.max_overlays_per_run,
+        )
 
     rewards_history = []
     total_steps = 0
@@ -214,7 +230,9 @@ def train_ppo(
     return TrainingResult(
         rewards=rewards_history,
         metrics={
-            "avg_reward": sum(rewards_history) / len(rewards_history) if rewards_history else 0.0
+            "avg_reward": (
+                sum(rewards_history) / len(rewards_history) if rewards_history else 0.0
+            )
         },
-        run_dir=Path(run_dir) if run_dir else None,
+        run_dir=paths.root if paths else None,
     )

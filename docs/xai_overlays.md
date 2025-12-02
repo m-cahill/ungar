@@ -32,6 +32,9 @@ config = DQNConfig(
 *   **`policy_grad`**: Saliency from policy gradient.
     *   **DQN**: Gradient of Q-value for the chosen action w.r.t. input.
     *   **PPO**: Gradient of the chosen action's logit w.r.t. input.
+*   **`value_grad`**: Saliency from value/critic gradient (M21).
+    *   **PPO**: Gradient of the state-value V(s) w.r.t. input.
+    *   **Note**: Only supported for PPO-style actor-critic agents. Not available for DQN.
 
 ## 2. Artifacts
 
@@ -130,13 +133,83 @@ ungar compare-overlays \
 
 4.  **Result:** `diff.png` shows where the agent's attention (gradient) differs from the ground truth (heuristic).
 
+## 6. Comparing Policy vs Value Gradients (M21)
+
+After training a PPO agent with both gradient methods enabled, you can compare them:
+
+```bash
+# Train PPO with both methods (in code)
+# xai = XAIConfig(enabled=True, methods=["policy_grad", "value_grad"])
+
+# Compare the two gradient types
+ungar compare-overlays \
+    --run runs/<ppo_run_id> \
+    --label-a policy_grad \
+    --label-b value_grad \
+    --agg mean \
+    --out diff_policy_vs_value.json
+
+# Outputs:
+# - diff_policy_vs_value.json: Difference map (normalized)
+# - diff_policy_vs_value.png: Heatmap visualization
+```
+
+**Interpretation:**
+
+*   **Positive values** (red): Cards where **policy gradient** is higher → actor focuses more on these cards for action selection.
+*   **Negative values** (blue): Cards where **value gradient** is higher → critic focuses more on these cards for state valuation.
+*   **Near-zero values** (white): Both networks assign similar importance.
+
+This comparison can reveal **actor-critic misalignment** — cases where the policy network and value network have learned to focus on different features.
+
 ### Gradient Method Details
 
 *   **Scalar Target:**
     *   **DQN:** $Q(s, a_{taken})$
-    *   **PPO:** Logit of $a_{taken}$
+    *   **PPO (policy):** Logit of $a_{taken}$
+    *   **PPO (value):** State-value $V(s)$
 *   **Aggregation:** Gradients are summed across feature planes (channels) to produce a single scalar per card position.
 *   **Normalization:** $L_1$ norm (sum to 1). Magnitudes are absolute.
+
+### Value Gradient Overlays (M21)
+
+**Value gradients** (`value_grad`) reveal which cards the critic/value network considers most important for estimating the state value, independent of which action is chosen.
+
+**Key Differences from Policy Gradients:**
+
+| Feature | `policy_grad` | `value_grad` |
+|---------|---------------|--------------|
+| **Target** | Action logit or Q-value | State-value V(s) |
+| **Question Answered** | "What matters for choosing this action?" | "What matters for evaluating this state?" |
+| **Action-Dependent** | Yes (varies per action) | No (pure state attribution) |
+| **Supported Algorithms** | DQN, PPO | PPO only (actor-critic) |
+
+**Use Cases:**
+
+*   **Critic Introspection**: Understanding what the value network has learned about state importance.
+*   **Comparison**: Comparing `policy_grad` vs `value_grad` can reveal whether the actor and critic focus on the same cards.
+*   **Debugging**: Identifying if the critic is attending to relevant state features.
+
+**Enabling in PPO:**
+
+```python
+from ungar.training.config import PPOConfig, XAIConfig
+
+config = PPOConfig(
+    # ... other params ...
+    xai=XAIConfig(
+        enabled=True,
+        methods=["policy_grad", "value_grad"],  # Both gradients
+        every_n_episodes=10,
+        max_overlays_per_run=200
+    )
+)
+```
+
+**Limitation:**
+
+*   `value_grad` is **not supported** for DQN because DQN does not have an explicit state-value function (only action-value Q(s,a)).
+*   Attempting to use `value_grad` with DQN will raise a `ValueError` during training setup.
 
 
 

@@ -48,7 +48,9 @@ def load_overlays(run_dir: str | Path) -> List[CardOverlay]:
     return overlays
 
 
-def compute_mean_overlay(overlays: List[CardOverlay], label: str = "mean") -> CardOverlay:
+def compute_mean_overlay(
+    overlays: List[CardOverlay], label: str = "mean"
+) -> CardOverlay:
     """Compute the mean of a list of overlays."""
     if not overlays:
         raise ValueError("Cannot compute mean of empty overlay list")
@@ -116,16 +118,16 @@ def compare_overlays(
 
     mean_a = compute_mean_overlay(overlays_a)
     mean_b = compute_mean_overlay(overlays_b)
-    
+
     diff_imp = mean_a.importance - mean_b.importance
-    
+
     # Optional: Normalize diff? M20 plan says "Optionally normalize... but don't renormalize to sum 1"
     # "divide by max(|diff|) if you want values in [-1, 1]"
     # Let's do that for easier visualization
     max_abs = np.max(np.abs(diff_imp))
     if max_abs > 1e-9:
         diff_imp = diff_imp / max_abs
-        
+
     return CardOverlay(
         run_id=f"{mean_a.run_id}_vs_{mean_b.run_id}",
         label="comparison",
@@ -136,7 +138,7 @@ def compare_overlays(
             "aggregated": True,
             "comparison": True,
             "count_a": len(overlays_a),
-            "count_b": len(overlays_b)
+            "count_b": len(overlays_b),
         },
     )
 

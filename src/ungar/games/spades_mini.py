@@ -185,7 +185,9 @@ class SpadesMiniState(GameState):
         planes = {
             "my_hand": self.hands[player],
             "legal_moves": [
-                Card.from_index(m.id) for m in self.legal_moves() if self.current_player() == player
+                Card.from_index(m.id)
+                for m in self.legal_moves()
+                if self.current_player() == player
             ],
             "current_trick": [card for _, card in self.current_trick.moves],
             "history": self.history,

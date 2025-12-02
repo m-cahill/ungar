@@ -22,13 +22,19 @@ def test_training_emits_overlays(tmp_path: Path) -> None:
     from ungar.training.train_dqn import train_dqn
 
     xai_config = XAIConfig(
-        enabled=True, methods=["heuristic", "random"], every_n_episodes=1, max_overlays_per_run=10
+        enabled=True,
+        methods=["heuristic", "random"],
+        every_n_episodes=1,
+        max_overlays_per_run=10,
     )
 
     dqn_config = DQNConfig(total_episodes=2, xai=xai_config)
 
     result = train_dqn(
-        game_name="high_card_duel", config=dqn_config, run_dir=run_dir, run_id="xai_test"
+        game_name="high_card_duel",
+        config=dqn_config,
+        run_dir=run_dir,
+        run_id="xai_test",
     )
 
     assert result.run_dir is not None

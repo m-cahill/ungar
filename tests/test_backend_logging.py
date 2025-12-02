@@ -33,7 +33,9 @@ def test_overlay_exporter(tmp_path: Path) -> None:
     import numpy as np
     from ungar.xai_methods import RandomOverlayMethod
 
-    exporter = OverlayExporter(out_dir=tmp_path, methods=[RandomOverlayMethod()], max_overlays=10)
+    exporter = OverlayExporter(
+        out_dir=tmp_path, methods=[RandomOverlayMethod()], max_overlays=10
+    )
 
     # export() computes and saves directly
     obs = np.zeros(56)  # 4x14 flattened

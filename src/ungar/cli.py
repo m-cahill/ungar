@@ -100,7 +100,9 @@ def cmd_list_runs(args: argparse.Namespace) -> None:
         import datetime
 
         dt = datetime.datetime.fromtimestamp(run.timestamp).strftime("%Y-%m-%d %H:%M")
-        print(f"{run.run_id:<10} {dt:<20} {run.game:<15} {run.algo:<10} {run.device:<10}")
+        print(
+            f"{run.run_id:<10} {dt:<20} {run.game:<15} {run.algo:<10} {run.device:<10}"
+        )
 
 
 def cmd_show_run(args: argparse.Namespace) -> None:
@@ -247,7 +249,9 @@ def cmd_plot_curves(args: argparse.Namespace) -> None:
     try:
         from ungar.analysis.plots import plot_learning_curve
     except ImportError:
-        print("matplotlib is required for plotting. Install with `pip install ungar[viz]`.")
+        print(
+            "matplotlib is required for plotting. Install with `pip install ungar[viz]`."
+        )
         sys.exit(1)
 
     run_paths = args.run
@@ -270,7 +274,9 @@ def cmd_summarize_overlays(args: argparse.Namespace) -> None:
         )
         from ungar.analysis.plots import plot_overlay_heatmap
     except ImportError:
-        print("matplotlib is required for plotting. Install with `pip install ungar[viz]`.")
+        print(
+            "matplotlib is required for plotting. Install with `pip install ungar[viz]`."
+        )
         sys.exit(1)
 
     run_path = args.run
@@ -307,12 +313,12 @@ def cmd_summarize_overlays(args: argparse.Namespace) -> None:
 
     png_path = out_dir / f"overlay_{agg_method}_heatmap.png"
     # plot_overlay_heatmap expects the raw 4x14 array for now?
-    # Or we can update it to take CardOverlay. 
+    # Or we can update it to take CardOverlay.
     # Existing signature: plot_overlay_heatmap(importance: np.ndarray, ...)
     plot_overlay_heatmap(
-        agg_overlay.importance, 
-        out_path=png_path, 
-        title=f"Overlay Heatmap ({agg_method})"
+        agg_overlay.importance,
+        out_path=png_path,
+        title=f"Overlay Heatmap ({agg_method})",
     )
     print(f"Saved heatmap PNG to {png_path}")
 
@@ -327,7 +333,9 @@ def cmd_compare_overlays(args: argparse.Namespace) -> None:
         )
         from ungar.analysis.plots import plot_overlay_heatmap
     except ImportError:
-        print("matplotlib is required for plotting. Install with `pip install ungar[viz]`.")
+        print(
+            "matplotlib is required for plotting. Install with `pip install ungar[viz]`."
+        )
         sys.exit(1)
 
     run_path = args.run
@@ -340,10 +348,10 @@ def cmd_compare_overlays(args: argparse.Namespace) -> None:
 
     print(f"Loading overlays from {run_path}...")
     all_overlays = load_overlays(run_path)
-    
+
     overlays_a = [o for o in all_overlays if o.label == label_a]
     overlays_b = [o for o in all_overlays if o.label == label_b]
-    
+
     if not overlays_a:
         print(f"No overlays found for label '{label_a}'")
         return
@@ -351,20 +359,22 @@ def cmd_compare_overlays(args: argparse.Namespace) -> None:
         print(f"No overlays found for label '{label_b}'")
         return
 
-    print(f"Comparing {len(overlays_a)} '{label_a}' vs {len(overlays_b)} '{label_b}' (agg={agg_method})...")
-    
+    print(
+        f"Comparing {len(overlays_a)} '{label_a}' vs {len(overlays_b)} '{label_b}' (agg={agg_method})..."
+    )
+
     diff_overlay = compare_overlays(overlays_a, overlays_b)
-    
+
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(overlay_to_dict(diff_overlay), f, indent=2)
     print(f"Saved comparison JSON to {out_file}")
-    
+
     # Plot
     png_path = out_file.with_suffix(".png")
     plot_overlay_heatmap(
         diff_overlay.importance,
         out_path=png_path,
-        title=f"Comparison: {label_a} - {label_b}"
+        title=f"Comparison: {label_a} - {label_b}",
     )
     print(f"Saved comparison heatmap to {png_path}")
 
@@ -388,28 +398,43 @@ def main() -> None:
 
     # Export Run
     export_parser = subparsers.add_parser("export-run", help="Export run artifacts")
-    export_parser.add_argument("--run-id", required=True, help="Run ID or partial directory name")
+    export_parser.add_argument(
+        "--run-id", required=True, help="Run ID or partial directory name"
+    )
     export_parser.add_argument("--out-dir", required=True, help="Destination directory")
 
     # Training
     train_parser = subparsers.add_parser("train", help="Start training")
     train_parser.add_argument(
-        "--game", required=True, help="Game name (high_card_duel, spades_mini, gin_rummy)"
+        "--game",
+        required=True,
+        help="Game name (high_card_duel, spades_mini, gin_rummy)",
     )
-    train_parser.add_argument("--algo", required=True, choices=["dqn", "ppo"], help="Algorithm")
+    train_parser.add_argument(
+        "--algo", required=True, choices=["dqn", "ppo"], help="Algorithm"
+    )
     train_parser.add_argument("--episodes", type=int, help="Number of episodes")
     train_parser.add_argument("--run-dir", help="Base run directory")
     train_parser.add_argument(
-        "--device", default="auto", choices=["auto", "cpu", "cuda", "mps"], help="Device to use"
+        "--device",
+        default="auto",
+        choices=["auto", "cpu", "cuda", "mps"],
+        help="Device to use",
     )
 
     # Analysis
     plot_parser = subparsers.add_parser("plot-curves", help="Plot learning curves")
-    plot_parser.add_argument("--run", action="append", required=True, help="Run ID or path")
+    plot_parser.add_argument(
+        "--run", action="append", required=True, help="Run ID or path"
+    )
     plot_parser.add_argument("--out", required=True, help="Output image path")
-    plot_parser.add_argument("--smooth", type=int, default=10, help="Smoothing window size")
+    plot_parser.add_argument(
+        "--smooth", type=int, default=10, help="Smoothing window size"
+    )
 
-    overlay_parser = subparsers.add_parser("summarize-overlays", help="Aggregate XAI overlays")
+    overlay_parser = subparsers.add_parser(
+        "summarize-overlays", help="Aggregate XAI overlays"
+    )
     overlay_parser.add_argument("--run", required=True, help="Run ID or path")
     overlay_parser.add_argument("--out-dir", required=True, help="Output directory")
     overlay_parser.add_argument(
@@ -420,11 +445,18 @@ def main() -> None:
     )
 
     # Compare Overlays
-    compare_parser = subparsers.add_parser("compare-overlays", help="Compare two overlay sets")
+    compare_parser = subparsers.add_parser(
+        "compare-overlays", help="Compare two overlay sets"
+    )
     compare_parser.add_argument("--run", required=True, help="Run ID or path")
     compare_parser.add_argument("--label-a", required=True, help="First label (A)")
     compare_parser.add_argument("--label-b", required=True, help="Second label (B)")
-    compare_parser.add_argument("--agg", default="mean", choices=["mean"], help="Aggregation method (currently only mean)")
+    compare_parser.add_argument(
+        "--agg",
+        default="mean",
+        choices=["mean"],
+        help="Aggregation method (currently only mean)",
+    )
     compare_parser.add_argument("--out", required=True, help="Output JSON file path")
 
     args = parser.parse_args()

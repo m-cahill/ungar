@@ -53,6 +53,14 @@ def train_dqn(
     if config is None:
         config = DQNConfig()
 
+    # M21-C: Validate that value_grad is not requested for DQN
+    if config.xai.enabled and "value_grad" in config.xai.methods:
+        raise ValueError(
+            "value_grad overlays are currently only supported for PPO-style "
+            "actor-critic agents. DQN does not have an explicit critic/value head. "
+            "Please use 'policy_grad' for DQN gradient-based XAI."
+        )
+
     # Device selection
     device_obj = get_device(config.device)
     device_str = str(device_obj)
@@ -114,7 +122,7 @@ def train_dqn(
             # We'll create exporter later after agent is ready if policy_grad is needed.
             # Or refactor to init methods late.
             # Let's move this block AFTER agent init.
-            
+
     if logger is None:
         logger = NoOpLogger()
 
@@ -139,7 +147,7 @@ def train_dqn(
         target_update_tau=config.target_update_tau,
         seed=seed,
     )
-    
+
     # NOW setup exporter with agent reference if needed
     if config.xai.enabled:
         from ungar.xai_methods import (
@@ -163,7 +171,7 @@ def train_dqn(
             methods=methods,
             max_overlays=config.xai.max_overlays_per_run,
         )
-    
+
     rewards_history = []
     total_steps = 0
 
@@ -275,7 +283,9 @@ def train_dqn(
     return TrainingResult(
         rewards=rewards_history,
         metrics={
-            "avg_reward": sum(rewards_history) / len(rewards_history) if rewards_history else 0.0
+            "avg_reward": (
+                sum(rewards_history) / len(rewards_history) if rewards_history else 0.0
+            )
         },
         run_dir=actual_run_dir,
     )

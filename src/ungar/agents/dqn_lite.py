@@ -84,7 +84,9 @@ class DQNLiteAgent:
         self.steps = 0
 
         # Networks
-        self.policy_net = QNetwork(input_dim, action_space_size)  # Renamed from q_net to standard
+        self.policy_net = QNetwork(
+            input_dim, action_space_size
+        )  # Renamed from q_net to standard
         self.target_net = QNetwork(input_dim, action_space_size)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=lr)
@@ -174,7 +176,9 @@ class DQNLiteAgent:
         self.optimizer.step()
 
         # Soft update target net
-        for target_param, param in zip(self.target_net.parameters(), self.policy_net.parameters()):
+        for target_param, param in zip(
+            self.target_net.parameters(), self.policy_net.parameters()
+        ):
             target_param.data.copy_(
                 self.target_update_tau * param.data
                 + (1.0 - self.target_update_tau) * target_param.data
