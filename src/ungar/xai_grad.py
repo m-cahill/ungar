@@ -269,9 +269,7 @@ def compute_value_grad_importance(
             target_scalar = target_output[0, value_index]
         else:
             # Default to first output (or squeeze if single value head)
-            target_scalar = (
-                target_output[0, 0] if target_output.shape[1] > 0 else target_output[0]
-            )
+            target_scalar = target_output[0, 0] if target_output.shape[1] > 0 else target_output[0]
     else:
         # Unexpected shape, try to get first element
         target_scalar = target_output.flatten()[0]

@@ -83,9 +83,7 @@ class GameEnv:
         self.state = self.spec.initial_state(seed=seed)
         return self.state
 
-    def step(
-        self, move: Move
-    ) -> tuple[GameState, Tuple[Reward, ...], bool, Mapping[str, Any]]:
+    def step(self, move: Move) -> tuple[GameState, Tuple[Reward, ...], bool, Mapping[str, Any]]:
         """Apply move to current state."""
         if self.state is None:
             msg = "Environment must be reset() before step()."

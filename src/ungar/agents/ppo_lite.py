@@ -77,9 +77,7 @@ class ActorCritic(nn.Module):
             action_tensor = probs.sample()
         else:
             # Normalize any incoming type to a proper LongTensor on the same device
-            action_tensor = torch.as_tensor(
-                action, dtype=torch.long, device=logits.device
-            )
+            action_tensor = torch.as_tensor(action, dtype=torch.long, device=logits.device)
 
         return (
             action_tensor,
@@ -199,11 +197,7 @@ class PPOLiteAgent:
                 - float(values[t])
             )
             advantages[t] = lastgaelam = (
-                delta
-                + self.config.gamma
-                * self.config.gae_lambda
-                * nextnonterminal
-                * lastgaelam
+                delta + self.config.gamma * self.config.gae_lambda * nextnonterminal * lastgaelam
             )
 
         returns = advantages + values

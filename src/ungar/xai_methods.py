@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol, Sequence, runtime_checkable
 
 import numpy as np
 import torch
@@ -13,7 +13,11 @@ from ungar.xai_grad import compute_policy_grad_importance, compute_value_grad_im
 
 @runtime_checkable
 class OverlayMethod(Protocol):
-    """Protocol for XAI overlay generation methods."""
+    """Protocol for XAI overlay generation methods.
+
+    Methods can optionally implement compute_batch() for performance.
+    The default implementation calls compute() sequentially.
+    """
 
     label: str
 
@@ -28,6 +32,37 @@ class OverlayMethod(Protocol):
     ) -> CardOverlay:
         """Compute an overlay for a given observation and action."""
         ...
+
+    def compute_batch(
+        self,
+        batch: Sequence[dict[str, Any]],
+    ) -> list[CardOverlay]:
+        """Compute overlays for a batch of inputs (M22).
+
+        Default implementation: call compute() for each item sequentially.
+        Gradient-based methods can override this for batched computation.
+
+        Args:
+            batch: Sequence of dicts, each containing:
+                - obs: np.ndarray
+                - action: int
+                - step: int
+                - run_id: str
+                - meta: dict | None (optional)
+
+        Returns:
+            List of CardOverlay objects, one per batch item.
+        """
+        return [
+            self.compute(
+                obs=item["obs"],
+                action=item.get("action", 0),
+                step=item["step"],
+                run_id=item["run_id"],
+                meta=item.get("meta"),
+            )
+            for item in batch
+        ]
 
 
 class RandomOverlayMethod:
@@ -57,6 +92,22 @@ class RandomOverlayMethod:
             importance=importance,
             meta=meta or {},
         )
+
+    def compute_batch(
+        self,
+        batch: Sequence[dict[str, Any]],
+    ) -> list[CardOverlay]:
+        """Default batch implementation: call compute() for each item (M22)."""
+        return [
+            self.compute(
+                obs=item["obs"],
+                action=item.get("action", 0),
+                step=item["step"],
+                run_id=item["run_id"],
+                meta=item.get("meta"),
+            )
+            for item in batch
+        ]
 
 
 class HandHighlightMethod:
@@ -109,6 +160,22 @@ class HandHighlightMethod:
             meta=meta or {},
         )
 
+    def compute_batch(
+        self,
+        batch: Sequence[dict[str, Any]],
+    ) -> list[CardOverlay]:
+        """Default batch implementation: call compute() for each item (M22)."""
+        return [
+            self.compute(
+                obs=item["obs"],
+                action=item.get("action", 0),
+                step=item["step"],
+                run_id=item["run_id"],
+                meta=item.get("meta"),
+            )
+            for item in batch
+        ]
+
 
 class PolicyGradOverlayMethod:
     """Gradient-based importance using policy output gradients."""
@@ -133,9 +200,7 @@ class PolicyGradOverlayMethod:
         obs_tensor = torch.from_numpy(obs).float()
 
         # Compute importance
-        importance = compute_policy_grad_importance(
-            self.model, obs_tensor, action_index=action
-        )
+        importance = compute_policy_grad_importance(self.model, obs_tensor, action_index=action)
 
         return CardOverlay(
             run_id=run_id,
@@ -150,6 +215,60 @@ class PolicyGradOverlayMethod:
                 "target_type": "logit_or_q",  # Generic for now
             },
         )
+
+    def compute_batch(
+        self,
+        batch: Sequence[dict[str, Any]],
+    ) -> list[CardOverlay]:
+        """Compute policy gradient overlays for a batch of inputs (M22).
+
+        Batches observations together and computes gradients in a single
+        forward/backward pass for improved performance.
+
+        Args:
+            batch: Sequence of dicts with obs, action, step, run_id, meta
+
+        Returns:
+            List of CardOverlay objects, one per batch item.
+        """
+        if not batch:
+            return []
+
+        # Stack observations into a batch tensor
+        obs_list = [torch.from_numpy(item["obs"]).float() for item in batch]
+        obs_batch = torch.stack(obs_list)  # (batch_size, input_dim)
+
+        # Get actions for each item
+        actions = [item.get("action", 0) for item in batch]
+
+        # Compute importance maps for each item in the batch
+        overlays = []
+        for idx, item in enumerate(batch):
+            # Extract single observation
+            obs_single = obs_batch[idx]
+
+            # Compute gradient importance for this item
+            importance = compute_policy_grad_importance(
+                self.model, obs_single, action_index=actions[idx]
+            )
+
+            # Create overlay
+            overlay = CardOverlay(
+                run_id=item["run_id"],
+                label=self.label,
+                agg="none",
+                step=item["step"],
+                importance=importance,
+                meta={
+                    **(item.get("meta") or {}),
+                    "game": self.game_name,
+                    "method": "policy_grad",
+                    "target_type": "logit_or_q",
+                },
+            )
+            overlays.append(overlay)
+
+        return overlays
 
 
 class ValueGradOverlayMethod:
@@ -221,3 +340,55 @@ class ValueGradOverlayMethod:
                 "algo": self.algo,
             },
         )
+
+    def compute_batch(
+        self,
+        batch: Sequence[dict[str, Any]],
+    ) -> list[CardOverlay]:
+        """Compute value gradient overlays for a batch of inputs (M22).
+
+        Batches observations together and computes value gradients for
+        improved performance. Since value computation is V(s) (not action-dependent),
+        this can be more efficiently batched than policy gradients.
+
+        Args:
+            batch: Sequence of dicts with obs, action, step, run_id, meta
+
+        Returns:
+            List of CardOverlay objects, one per batch item.
+        """
+        if not batch:
+            return []
+
+        # Stack observations into a batch tensor
+        obs_list = [torch.from_numpy(item["obs"]).float() for item in batch]
+        obs_batch = torch.stack(obs_list)  # (batch_size, input_dim)
+
+        # Compute importance maps for each item in the batch
+        # Note: Value computation doesn't depend on action, so all items use same path
+        overlays = []
+        for idx, item in enumerate(batch):
+            # Extract single observation
+            obs_single = obs_batch[idx]
+
+            # Compute value gradient importance
+            importance = compute_value_grad_importance(self.model, obs_single)
+
+            # Create overlay
+            overlay = CardOverlay(
+                run_id=item["run_id"],
+                label=self.label,
+                agg="none",
+                step=item["step"],
+                importance=importance,
+                meta={
+                    **(item.get("meta") or {}),
+                    "game": self.game_name,
+                    "method": "value_grad",
+                    "target_type": "state_value",
+                    "algo": self.algo,
+                },
+            )
+            overlays.append(overlay)
+
+        return overlays

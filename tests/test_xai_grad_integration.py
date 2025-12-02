@@ -152,3 +152,44 @@ def test_dqn_rejects_value_grad(tmp_path: Path) -> None:
             run_dir=run_dir,
             run_id="should_fail",
         )
+
+
+def test_ppo_batch_overlay_engine(tmp_path: Path) -> None:
+    """Test PPO with batch overlay engine (M22)."""
+    run_dir = tmp_path / "runs"
+
+    xai_config = XAIConfig(
+        enabled=True,
+        methods=["policy_grad", "value_grad"],
+        every_n_episodes=1,
+        max_overlays_per_run=10,
+        batch_size=3,  # M22: Enable batching
+    )
+
+    ppo_config = PPOConfig(total_episodes=3, batch_size=32, xai=xai_config)
+
+    result = train_ppo(
+        game_name="high_card_duel",
+        config=ppo_config,
+        run_dir=run_dir,
+        run_id="batch_test",
+    )
+
+    assert result.run_dir is not None
+    overlays_dir = result.run_dir / "overlays"
+    assert overlays_dir.exists()
+
+    # Expect overlays from both methods (3 episodes × 2 methods = 6 files)
+    policy_files = list(overlays_dir.glob("policy_grad_*.json"))
+    value_files = list(overlays_dir.glob("value_grad_*.json"))
+
+    assert len(policy_files) == 3
+    assert len(value_files) == 3
+
+    # Verify overlays are valid
+    for overlay_file in policy_files + value_files:
+        with open(overlay_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            assert "importance" in data
+            assert len(data["importance"]) == 4  # 4 suits
+            assert len(data["importance"][0]) == 14  # 14 ranks

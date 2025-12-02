@@ -45,9 +45,7 @@ def test_compute_policy_grad_logic() -> None:
         model.linear.weight[0, 0] = 10.0  # High sensitivity for first pixel
         model.linear.bias.fill_(0.0)
 
-    obs = torch.ones(
-        56
-    )  # Input doesn't strictly matter for linear gradient, but non-zero is safe
+    obs = torch.ones(56)  # Input doesn't strictly matter for linear gradient, but non-zero is safe
 
     importance = compute_policy_grad_importance(model, obs, action_index=0)
 
@@ -71,9 +69,7 @@ def test_compute_policy_grad_multi_plane() -> None:
         model.linear.weight[0, 1] = 3.0
 
     obs = torch.randn(112)
-    importance = compute_policy_grad_importance(
-        model, obs, action_index=0, normalize=False
-    )
+    importance = compute_policy_grad_importance(model, obs, action_index=0, normalize=False)
 
     # Raw gradient sum should be |2| + |3| = 5
     assert np.isclose(importance[0, 0], 5.0)

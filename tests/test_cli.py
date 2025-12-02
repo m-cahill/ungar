@@ -122,9 +122,7 @@ def test_summarize_overlays_smoke(tmp_path: Path) -> None:
         patch("ungar.analysis.plots.plot_overlay_heatmap"),
         patch.dict(sys.modules, {"matplotlib": MagicMock()}),
     ):
-        run_cli(
-            ["summarize-overlays", "--run", "some/path", "--out-dir", str(tmp_path)]
-        )
+        run_cli(["summarize-overlays", "--run", "some/path", "--out-dir", str(tmp_path)])
 
 
 def test_compare_overlays_smoke(tmp_path: Path) -> None:

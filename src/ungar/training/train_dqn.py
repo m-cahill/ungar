@@ -283,9 +283,7 @@ def train_dqn(
     return TrainingResult(
         rewards=rewards_history,
         metrics={
-            "avg_reward": (
-                sum(rewards_history) / len(rewards_history) if rewards_history else 0.0
-            )
+            "avg_reward": (sum(rewards_history) / len(rewards_history) if rewards_history else 0.0)
         },
         run_dir=actual_run_dir,
     )

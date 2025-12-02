@@ -101,6 +101,8 @@ XAI attribution maps stored as JSON files in the `overlays/` subdirectory.
 *   `policy_grad`: Gradient/saliency w.r.t policy output (or Q-value). Supported for DQN and PPO.
 *   `value_grad`: Gradient/saliency w.r.t critic/value output V(s). Supported for PPO only (M21).
 
+**Note (M22):** Overlays may be computed in batches internally for performance, but the artifact structure remains identical.
+
 ### Aggregation Semantics
 
 *   `agg`: Describes how this overlay was derived from others.

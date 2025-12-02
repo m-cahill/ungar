@@ -48,9 +48,7 @@ def load_overlays(run_dir: str | Path) -> List[CardOverlay]:
     return overlays
 
 
-def compute_mean_overlay(
-    overlays: List[CardOverlay], label: str = "mean"
-) -> CardOverlay:
+def compute_mean_overlay(overlays: List[CardOverlay], label: str = "mean") -> CardOverlay:
     """Compute the mean of a list of overlays."""
     if not overlays:
         raise ValueError("Cannot compute mean of empty overlay list")
@@ -109,9 +107,7 @@ def aggregate_overlays(overlays: List[CardOverlay], method: str = "mean") -> np.
         raise ValueError(f"Unknown aggregation method: {method}")
 
 
-def compare_overlays(
-    overlays_a: List[CardOverlay], overlays_b: List[CardOverlay]
-) -> CardOverlay:
+def compare_overlays(overlays_a: List[CardOverlay], overlays_b: List[CardOverlay]) -> CardOverlay:
     """Compute difference overlay (mean(A) - mean(B))."""
     if not overlays_a or not overlays_b:
         raise ValueError("Cannot compare empty overlay lists")

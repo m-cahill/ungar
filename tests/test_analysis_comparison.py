@@ -41,12 +41,8 @@ def test_compare_overlays_sign() -> None:
     imp_b = np.zeros((4, 14))
     imp_b[0, 1] = 1.0
 
-    o_a = CardOverlay(
-        run_id="r1", label="A", agg="none", step=1, importance=imp_a, meta={}
-    )
-    o_b = CardOverlay(
-        run_id="r1", label="B", agg="none", step=1, importance=imp_b, meta={}
-    )
+    o_a = CardOverlay(run_id="r1", label="A", agg="none", step=1, importance=imp_a, meta={})
+    o_b = CardOverlay(run_id="r1", label="B", agg="none", step=1, importance=imp_b, meta={})
 
     diff = compare_overlays([o_a], [o_b])
 

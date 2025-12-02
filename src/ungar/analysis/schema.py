@@ -102,9 +102,7 @@ def validate_metrics_file(path: Path | str) -> None:
                     _ = int(row["episode"])
                     _ = float(row["reward"])
                 except ValueError as e:
-                    raise SchemaError(
-                        f"Metrics file has invalid types at row {i+2}: {e}"
-                    )
+                    raise SchemaError(f"Metrics file has invalid types at row {i+2}: {e}")
 
                 if step < last_step:
                     raise SchemaError(
@@ -185,6 +183,4 @@ def validate_overlay(payload: Dict[str, Any]) -> None:
         # Check elements are numbers
         for val in row:
             if not isinstance(val, (int, float)):
-                raise SchemaError(
-                    f"Overlay 'importance' contains non-numeric value: {val}"
-                )
+                raise SchemaError(f"Overlay 'importance' contains non-numeric value: {val}")

@@ -44,9 +44,7 @@ def test_validate_partition_overlap() -> None:
     # Complete but overlapping
     all_c = set(all_cards())
     # Put Ace of Spades in both
-    tensor = CardTensor.from_plane_card_map(
-        {"all": all_c, "extra": {Card(Suit.SPADES, Rank.ACE)}}
-    )
+    tensor = CardTensor.from_plane_card_map({"all": all_c, "extra": {Card(Suit.SPADES, Rank.ACE)}})
 
     with pytest.raises(ValueError, match="appears in multiple planes"):
         tensor.validate_partition(["all", "extra"])

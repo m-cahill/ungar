@@ -126,14 +126,13 @@ def train_ppo(
                 methods.append(PolicyGradOverlayMethod(agent.actor, game_name))
             elif m == "value_grad":
                 # For PPO, pass the full ActorCritic network (has get_value method)
-                methods.append(
-                    ValueGradOverlayMethod(agent.actor, game_name, algo="ppo")
-                )
+                methods.append(ValueGradOverlayMethod(agent.actor, game_name, algo="ppo"))
 
         exporter = OverlayExporter(
             out_dir=paths.overlays,
             methods=methods,
             max_overlays=config.xai.max_overlays_per_run,
+            batch_size=config.xai.batch_size,  # M22: Enable batch overlay generation
         )
 
     rewards_history = []
@@ -222,17 +221,15 @@ def train_ppo(
             )
 
     if exporter:
-        # Just save for now, we didn't collect any overlays in this loop yet
-        pass
+        # M22: Flush any remaining buffered overlays
+        exporter.flush()
 
     logger.close()
 
     return TrainingResult(
         rewards=rewards_history,
         metrics={
-            "avg_reward": (
-                sum(rewards_history) / len(rewards_history) if rewards_history else 0.0
-            )
+            "avg_reward": (sum(rewards_history) / len(rewards_history) if rewards_history else 0.0)
         },
         run_dir=paths.root if paths else None,
     )

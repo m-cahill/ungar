@@ -128,6 +128,7 @@ M11 adds **Gin Rummy**, a complex imperfect-information game with draw/discard m
 * **M19** – XAI Overlay Engine v1: Heuristic & Random (Done).
 * **M20** – Gradient-Based XAI (`policy_grad`) + Overlay Comparison (Done).
 * **M21** – Value-Gradient XAI (`value_grad`, PPO-only) (Done).
+* **M22** – Batch Overlay Engine (PPO XAI Performance) (In Progress).
 
 ## Documentation
 

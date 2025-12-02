@@ -95,9 +95,7 @@ def test_value_grad_overlay_custom_meta() -> None:
     obs = np.ones(56, dtype=np.float32)
     custom_meta = {"episode": 42, "player": 1}
 
-    overlay = method.compute(
-        obs=obs, action=0, step=10, run_id="custom_test", meta=custom_meta
-    )
+    overlay = method.compute(obs=obs, action=0, step=10, run_id="custom_test", meta=custom_meta)
 
     # Custom meta should be preserved
     assert overlay.meta["episode"] == 42

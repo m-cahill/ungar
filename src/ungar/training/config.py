@@ -31,6 +31,15 @@ class XAIConfig:
     every_n_episodes: int = 10
     max_overlays_per_run: int = 200
     max_grad_overlay_steps: int | None = None  # M20-C: Limit gradient overlay frequency
+    batch_size: int | None = None  # M22: Batch overlay generation (1-32, None=sequential)
+
+    def __post_init__(self) -> None:
+        """Validate configuration parameters (M22)."""
+        if self.batch_size is not None and not (1 <= self.batch_size <= 32):
+            raise ValueError(
+                "XAIConfig.batch_size must be between 1 and 32 (inclusive). "
+                f"Got {self.batch_size}."
+            )
 
 
 @dataclass
