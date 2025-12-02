@@ -97,6 +97,11 @@ jobs:
           python scripts/demo_m22_full_cycle.py --clean
         continue-on-error: false
 
+      - name: Generate CI Summary
+        if: always()
+        run: |
+          python scripts/generate_ci_summary.py >> $GITHUB_STEP_SUMMARY
+
       - name: Upload coverage.xml
         if: success()
         uses: actions/upload-artifact@v4

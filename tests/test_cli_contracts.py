@@ -4,14 +4,10 @@ These tests ensure the v1 CLI contract remains stable.
 Breaking these tests indicates a breaking change that requires version bump.
 """
 
-import subprocess
-import sys
 
 import pytest
-
 from ungar import __version__
 from ungar.training.config import XAIConfig
-
 
 # ============================================================================
 # Version Contract Tests
@@ -86,7 +82,7 @@ def test_cli_train_help() -> None:
 def test_cli_summarize_overlays_exists() -> None:
     """Test that summarize-overlays command exists."""
     # Validate via import rather than subprocess to avoid timeout issues
-    from ungar.analysis.overlays import load_overlays, compute_mean_overlay
+    from ungar.analysis.overlays import compute_mean_overlay, load_overlays
 
     # Contract: These functions must exist for CLI commands to work
     assert callable(load_overlays)
@@ -169,4 +165,3 @@ def test_batch_size_error_message_format() -> None:
         # Contract: Error format should be consistent
         assert "batch_size must be between 1 and 32" in error_msg
         assert "Got 50" in error_msg
-

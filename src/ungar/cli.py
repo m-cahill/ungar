@@ -26,8 +26,9 @@ from ungar.training.train_ppo import train_ppo
 
 def _get_version_string() -> str:
     """Get version string with commit hash (M23)."""
-    from ungar import __version__
     import subprocess
+
+    from ungar import __version__
 
     try:
         # Try to get git commit hash
@@ -456,7 +457,7 @@ def main() -> None:
         help="Device to use",
     )
     train_parser.add_argument("--seed", type=int, help="Random seed for reproducibility")
-    
+
     # XAI parameters (M19-M22)
     xai_group = train_parser.add_argument_group(
         "XAI Options", "Explainable AI overlay generation (see docs/xai_overlays.md)"
