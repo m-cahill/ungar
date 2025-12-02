@@ -204,31 +204,50 @@ def cmd_export_run(args: argparse.Namespace) -> None:
 
 def cmd_train(args: argparse.Namespace) -> None:
     """Start a training run."""
+    from ungar.training.config import XAIConfig
+
     game = args.game
     algo = args.algo
     episodes = args.episodes
     run_dir = args.run_dir or _get_runs_dir()
     device_str = args.device
+    seed = getattr(args, "seed", None)
 
     print(f"Starting {algo.upper()} training on {game}...")
     print(f"Episodes: {episodes if episodes else 'Default'}")
     print(f"Device: {device_str}")
+    if seed is not None:
+        print(f"Seed: {seed}")
 
     device_config = DeviceConfig(device=device_str)
 
+    # Build XAI config if enabled
+    xai_config = XAIConfig()
+    if getattr(args, "xai_enabled", False):
+        xai_config.enabled = True
+        if args.xai_methods:
+            xai_config.methods = args.xai_methods
+        if args.xai_batch_size is not None:
+            xai_config.batch_size = args.xai_batch_size
+        if args.xai_every_n_episodes is not None:
+            xai_config.every_n_episodes = args.xai_every_n_episodes
+        if args.xai_max_overlays is not None:
+            xai_config.max_overlays_per_run = args.xai_max_overlays
+        print(f"XAI enabled: methods={xai_config.methods}, batch_size={xai_config.batch_size}")
+
     if algo == "dqn":
-        dqn_config = DQNConfig(device=device_config)
+        dqn_config = DQNConfig(device=device_config, xai=xai_config)
         if episodes:
             dqn_config.total_episodes = episodes
 
-        result = train_dqn(game_name=game, config=dqn_config, run_dir=run_dir)
+        result = train_dqn(game_name=game, config=dqn_config, run_dir=run_dir, seed=seed or 0)
 
     elif algo == "ppo":
-        ppo_config = PPOConfig(device=device_config)
+        ppo_config = PPOConfig(device=device_config, xai=xai_config)
         if episodes:
             ppo_config.total_episodes = episodes
 
-        result = train_ppo(game_name=game, config=ppo_config, run_dir=run_dir)  # type: ignore[assignment]
+        result = train_ppo(game_name=game, config=ppo_config, run_dir=run_dir, seed=seed or 0)  # type: ignore[assignment]
     else:
         print(f"Unknown algorithm: {algo}")
         sys.exit(1)
@@ -409,6 +428,23 @@ def main() -> None:
         choices=["auto", "cpu", "cuda", "mps"],
         help="Device to use",
     )
+    train_parser.add_argument("--seed", type=int, help="Random seed for reproducibility")
+    # XAI parameters
+    train_parser.add_argument(
+        "--xai-enabled", action="store_true", help="Enable XAI overlay generation"
+    )
+    train_parser.add_argument(
+        "--xai-methods",
+        nargs="+",
+        help="XAI methods (heuristic, random, policy_grad, value_grad)",
+    )
+    train_parser.add_argument(
+        "--xai-batch-size", type=int, help="Batch size for overlay generation"
+    )
+    train_parser.add_argument(
+        "--xai-every-n-episodes", type=int, help="Generate overlays every N episodes"
+    )
+    train_parser.add_argument("--xai-max-overlays", type=int, help="Maximum overlays per run")
 
     # Analysis
     plot_parser = subparsers.add_parser("plot-curves", help="Plot learning curves")

@@ -93,7 +93,25 @@ If RediAI is installed, metrics like average reward are logged to the workflow. 
 *   **M19:** XAI Overlay Engine v1: Heuristic & Random (Done).
 *   **M20:** Gradient-Based XAI (`policy_grad`) + Overlay Comparison (Done).
 *   **M21:** Value-Gradient XAI (`value_grad`, PPO-only) (Done).
-*   **M22:** Batch Overlay Engine (PPO XAI Performance) (In Progress).
+*   **M22:** Batch Overlay Engine (PPO XAI Performance) (Done).
+
+### M22 Demo
+
+A comprehensive demo script validates the complete M22 batch overlay engine:
+
+```bash
+python scripts/demo_m22_full_cycle.py
+```
+
+**Phases:**
+1. Training with batched XAI (PPO on High Card Duel)
+2. Numerical equivalence validation (batch == sequential < 1e-6)
+3. CLI commands verification
+4. Heatmap visualization
+5. Performance profiling (optional with `--with-profiling`)
+6. Summary JSON output
+
+See [docs/demo_m22.md](docs/demo_m22.md) for complete documentation and validation criteria.
 
 ## Frontend Status & Integration
 

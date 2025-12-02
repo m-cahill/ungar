@@ -128,11 +128,31 @@ M11 adds **Gin Rummy**, a complex imperfect-information game with draw/discard m
 * **M19** – XAI Overlay Engine v1: Heuristic & Random (Done).
 * **M20** – Gradient-Based XAI (`policy_grad`) + Overlay Comparison (Done).
 * **M21** – Value-Gradient XAI (`value_grad`, PPO-only) (Done).
-* **M22** – Batch Overlay Engine (PPO XAI Performance) (In Progress).
+* **M22** – Batch Overlay Engine (PPO XAI Performance) (Done).
+
+## XAI & M22 Batch Overlay Demo
+
+UNGAR includes a complete Explainable AI (XAI) system with batched gradient overlay generation (M22).
+
+**Try the full demo:**
+
+```bash
+python scripts/demo_m22_full_cycle.py
+```
+
+This validates:
+* ✅ Batched XAI overlay generation (5-10× faster)
+* ✅ Numerical equivalence (batch == sequential)
+* ✅ CLI commands (`train`, `list-runs`, `summarize-overlays`)
+* ✅ Heatmap visualization
+* ✅ Performance profiling
+
+See **[docs/demo_m22.md](docs/demo_m22.md)** for complete documentation.
 
 ## Documentation
 
 * [docs/cli_quickstart.md](docs/cli_quickstart.md): **Start Here!** 5-minute guide.
+* [docs/demo_m22.md](docs/demo_m22.md): **M22 XAI Demo** — Full cycle validation.
 * [bridge/README.md](bridge/README.md): Bridge package usage.
 * [docs/bridge_rediai.md](docs/bridge_rediai.md): Detailed RediAI integration docs.
 * [docs/ungar_agents.md](docs/ungar_agents.md): Unified Agent system (DQN/Random).
