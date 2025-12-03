@@ -129,6 +129,7 @@ M11 adds **Gin Rummy**, a complex imperfect-information game with draw/discard m
 * **M20** – Gradient-Based XAI (`policy_grad`) + Overlay Comparison (Done).
 * **M21** – Value-Gradient XAI (`value_grad`, PPO-only) (Done).
 * **M22** – Batch Overlay Engine (PPO XAI Performance) (Done).
+* **M23** – v1 Core Lock-In & Polish (API Contracts, Versioning, Guardrails) (Done).
 
 ## XAI & M22 Batch Overlay Demo
 
@@ -151,11 +152,26 @@ See **[docs/demo_m22.md](docs/demo_m22.md)** for complete documentation.
 
 ## Documentation
 
-* [docs/cli_quickstart.md](docs/cli_quickstart.md): **Start Here!** 5-minute guide.
+**Getting Started:**
+* [docs/quickstart_v1.md](docs/quickstart_v1.md): **Start Here!** 30-minute complete onboarding.
 * [docs/demo_m22.md](docs/demo_m22.md): **M22 XAI Demo** — Full cycle validation.
+
+**v1 Contracts & Architecture:**
+* [docs/api_contracts_v1.md](docs/api_contracts_v1.md): **v1 Core Contract** — Stable interfaces and guarantees.
+* [docs/adr/](docs/adr/): Architecture Decision Records (ADR-001 through ADR-004).
+* [CHANGELOG.md](CHANGELOG.md): Version history and release notes.
+
+**Core Systems:**
+* [docs/cli_reference.md](docs/cli_reference.md): Complete CLI command reference.
+* [docs/xai_overlays.md](docs/xai_overlays.md): Explainable AI system guide.
+* [docs/analytics_schema.md](docs/analytics_schema.md): Analytics data formats.
+* [docs/analytics_overview.md](docs/analytics_overview.md): Analysis and Visualization tools.
+
+**Training & Agents:**
+* [docs/ungar_agents.md](docs/ungar_agents.md): Unified Agent system.
+* [docs/training_dqn.md](docs/training_dqn.md): DQN training guide.
+* [docs/training_ppo.md](docs/training_ppo.md): PPO training guide.
+
+**Integration:**
 * [bridge/README.md](bridge/README.md): Bridge package usage.
-* [docs/bridge_rediai.md](docs/bridge_rediai.md): Detailed RediAI integration docs.
-* [docs/ungar_agents.md](docs/ungar_agents.md): Unified Agent system (DQN/Random).
-* [docs/training_dqn.md](docs/training_dqn.md): Training guide for DQN.
-* [docs/training_ppo.md](docs/training_ppo.md): Training guide for PPO.
-* [docs/analytics_overview.md](docs/analytics_overview.md): Analysis and Visualization tools (M15).
+* [docs/bridge_rediai.md](docs/bridge_rediai.md): RediAI integration.
