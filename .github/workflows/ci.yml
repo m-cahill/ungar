@@ -81,6 +81,7 @@ jobs:
           python -m pip install -r requirements-dev.txt --no-deps
           python -m pip install -e . --no-deps
           python -m pip install -e bridge --no-deps
+          python -m pip install matplotlib>=3.7.0
 
       - name: Run Full Tests
         run: |
