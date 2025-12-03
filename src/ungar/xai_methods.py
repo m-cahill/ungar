@@ -28,7 +28,7 @@ class OverlayMethod(Protocol):
         *,
         step: int,
         run_id: str,
-        meta: dict | None = None,
+        meta: Any = None,
     ) -> CardOverlay:
         """Compute an overlay for a given observation and action."""
         ...
@@ -48,7 +48,7 @@ class OverlayMethod(Protocol):
                 - action: int
                 - step: int
                 - run_id: str
-                - meta: dict | None (optional)
+                - meta: Any (optional)
 
         Returns:
             List of CardOverlay objects, one per batch item.
@@ -77,7 +77,7 @@ class RandomOverlayMethod:
         *,
         step: int,
         run_id: str,
-        meta: dict | None = None,
+        meta: Any = None,
     ) -> CardOverlay:
         """Generate a random 4x14 overlay."""
         importance = np.random.rand(SUIT_COUNT, RANK_COUNT)
@@ -122,7 +122,7 @@ class HandHighlightMethod:
         *,
         step: int,
         run_id: str,
-        meta: dict | None = None,
+        meta: Any = None,
     ) -> CardOverlay:
         """Generate an overlay highlighting held cards."""
         # This method is tightly coupled to tensor layout.
@@ -193,7 +193,7 @@ class PolicyGradOverlayMethod:
         *,
         step: int,
         run_id: str,
-        meta: dict[str, Any] | None = None,
+        meta: Any = None,
     ) -> CardOverlay:
         """Compute policy gradient overlay."""
         # Convert obs to tensor
@@ -303,7 +303,7 @@ class ValueGradOverlayMethod:
         *,
         step: int,
         run_id: str,
-        meta: dict[str, Any] | None = None,
+        meta: Any = None,
     ) -> CardOverlay:
         """Compute value gradient overlay.
 
