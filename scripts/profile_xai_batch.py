@@ -9,6 +9,7 @@ Usage:
 
 import argparse
 import time
+from typing import Any
 
 import numpy as np
 import torch
@@ -59,7 +60,7 @@ def generate_fake_observations(num_obs: int, input_dim: int = 168) -> list[np.nd
     return [np.random.rand(input_dim).astype(np.float32) for _ in range(num_obs)]
 
 
-def profile_sequential(method, observations: list[np.ndarray]) -> tuple[float, int]:
+def profile_sequential(method: Any, observations: list[np.ndarray]) -> tuple[float, int]:
     """Profile sequential overlay generation."""
     start_time = time.perf_counter()
 
@@ -74,7 +75,9 @@ def profile_sequential(method, observations: list[np.ndarray]) -> tuple[float, i
     return elapsed, len(overlays)
 
 
-def profile_batched(method, observations: list[np.ndarray], batch_size: int) -> tuple[float, int]:
+def profile_batched(
+    method: Any, observations: list[np.ndarray], batch_size: int
+) -> tuple[float, int]:
     """Profile batched overlay generation."""
     # Create batch requests
     batch = [
@@ -97,7 +100,7 @@ def profile_batched(method, observations: list[np.ndarray], batch_size: int) -> 
     return elapsed, len(overlays)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Profile batch vs sequential overlay generation")
     parser.add_argument(
         "--batch-size", type=int, default=8, help="Batch size for profiling (default: 8)"

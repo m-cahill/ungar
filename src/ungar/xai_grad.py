@@ -240,7 +240,8 @@ def compute_value_grad_importance(
 
     # Try to call get_value if available (PPO ActorCritic), otherwise direct call
     if hasattr(model, "get_value"):
-        output = model.get_value(batch_input)  # type: ignore[operator]
+        # MyPy doesn't know hasattr narrows the type, so we help it
+        output = getattr(model, "get_value")(batch_input)
     else:
         output = model(batch_input)
 

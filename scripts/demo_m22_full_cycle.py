@@ -128,7 +128,7 @@ def phase_2_numerical_equivalence(run_dir: Path) -> float:
     o1 = policy_method.compute(obs=obs, action=0, step=0, run_id="seq", meta={})
     o2_list = policy_method.compute_batch(
         [{"obs": obs, "action": 0, "step": 0, "run_id": "batch", "meta": {}}]
-    )  # type: ignore[arg-type]
+    )
     o2 = o2_list[0]
 
     policy_diff = np.abs(o1.importance - o2.importance).max()
@@ -140,7 +140,7 @@ def phase_2_numerical_equivalence(run_dir: Path) -> float:
     v1 = value_method.compute(obs=obs, action=0, step=0, run_id="seq", meta={})
     v2_list = value_method.compute_batch(
         [{"obs": obs, "action": 0, "step": 0, "run_id": "batch", "meta": {}}]
-    )  # type: ignore[arg-type]
+    )
     v2 = v2_list[0]
 
     value_diff = np.abs(v1.importance - v2.importance).max()
@@ -262,7 +262,7 @@ def phase_4_heatmap_visualization(run_dir: Path) -> Path | None:
     return heatmap_path
 
 
-def phase_5_profiling(run: bool = False) -> dict[str, float] | None:
+def phase_5_profiling(run: bool = False) -> dict[str, str | float] | None:
     """Phase 5: Optional performance profiling.
 
     Args:
@@ -305,10 +305,10 @@ def phase_5_profiling(run: bool = False) -> dict[str, float] | None:
             print(result.stdout)
             print("✅ Profiling complete")
             # Parse speedup from output (rough extraction)
-            return {"profiling_status": "completed"}
+            return {"profiling_status": "completed", "speedup": 0.0}
         else:
             print(f"⚠️  Profiling failed: {result.stderr}")
-            return {"profiling_status": "failed"}
+            return {"profiling_status": "failed", "speedup": 0.0}
 
     except FileNotFoundError:
         print("⚠️  Profiling script not found")
@@ -323,7 +323,7 @@ def generate_summary(
     max_diff: float,
     num_overlays: int,
     heatmap_path: Path | None,
-    profiling_results: dict[str, float] | None,
+    profiling_results: dict[str, str | float] | None,
 ) -> Path:
     """Generate summary JSON report.
 
